@@ -3,3 +3,7 @@
 .dart_tool/
 build/*
 !build/.gitkeep
+
+# System Files
+.DS_Store
+Thumbs.db
