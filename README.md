@@ -6,7 +6,7 @@ Import messages from other apps like WhatsApp to Signal.
 
 * Only tested on Android
 * No group text support
-* The commands below were run on MacOS
+* The commands below were run on macOS
 * Before you begin make sure you:
   * backup Signal before you begin
   * have written down the 30 digit backup code
@@ -17,7 +17,7 @@ Import messages from other apps like WhatsApp to Signal.
 
 1. Install [Dart](https://dart.dev/)
 
-2. Download/Clone this git
+2. Download/Clone this git or download arm macOS binary
 
 3. Install [signalbackup-tools](https://github.com/bepaald/signalbackup-tools)
 
@@ -62,6 +62,21 @@ Import messages from other apps like WhatsApp to Signal.
     ```
 
 10. Run MoveToSignal in terminal
+
+    Mac arm64 binary
+
+    ```bash
+    cd path/to/working/folder/from/step/9
+
+    path/to/MoveToSignal/move_to_signal_Darwin_arm64 \
+    --signalBackup=./signal-2023-12-03-12-00-00.backup \
+    --signalBackupKey=123451234512345123451234512345 \
+    --signalPhoneNumber=+49123456789 \
+    --whatsappExports=./whatsapp \
+    --verbose
+    ```
+
+    From source
 
     ```bash
     cd path/to/working/folder/from/step/9
@@ -120,7 +135,7 @@ bin/move_to_signal.dart \
 ### Language based date time format in Whatsapp exports
 
 Whatsapp exports have language based time format in export file and for Android without seconds. In my case 01/12/2023, 23:59  
-The new WhatsApp Mac App has a more usable format [01.12.23, 23:59:42] for the same message as Android, but in my case only loads the last 3 years of chat history.
+The new WhatsApp macOS App has a more usable format [01.12.23, 23:59:42] for the same message as Android, but in my case only loads the last 3 years of chat history.
 
 Please open an issue with a small anonymized sample export and your device language. Or better open a PR with a fix. :)
 
