@@ -105,6 +105,16 @@ Import messages from other apps like WhatsApp to Signal.
     [WhatsApp] For WhatsApp exports
 ```
 
+## Build binary from source
+
+```bash
+cd path/to/MoveToSignal/
+
+dart compile exe \
+bin/move_to_signal.dart \
+-o build/move_to_signal_$(uname -s)_$(uname -m)
+```
+
 ## Known issues
 
 ### Language based date time format in Whatsapp exports
