@@ -122,3 +122,5 @@ But you can rerun the script as often as you like until no error occurs.
 ## Sponsor this project
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/movetosignal/5)
+
+You might also consider helping out the Signal Foundation here: https://support.signal.org/hc/en-us/articles/360007319831-How-can-I-contribute-to-Signal-
