@@ -22,6 +22,6 @@ void main(List<String> arguments) {
 
       break;
     default:
-      print('Invalid argument --importSource');
+      print('Invalid argument --importSource=$importSource');
   }
 }
