@@ -11,9 +11,6 @@ class SourceWhatsApp extends SignalImport {
   run(List<String> arguments) {
     // Read all arguments
     for (final argument in arguments) {
-      if (argument == '--verbose') {
-        verbose = true;
-      }
       if (argument.startsWith('--whatsappExports=')) {
         whatsappExports = Directory(argument.split('=').last);
       }
