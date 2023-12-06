@@ -49,6 +49,28 @@ class SourceTelegram extends SignalImport {
     _telegramExportsFolder = Directory(path.join(telegramExports, 'telegram'));
 
 //    super.run(arguments);
+    if (telegramMode == 'ListUser') {
+      if (verbose) print('Run in Telegram list user mode');
+
+      if (verbose) print('Check missing prepare Telegram arguments');
+
+      if (telegramJson == null) {
+        print('Missing argument --telegramJson');
+        return;
+      }
+
+      if (!telegramJson!.existsSync()) {
+        print('--telegramJson=${telegramJson!.path} file not found');
+        return;
+      }
+
+      if (verbose) print('Parse Telegram JSON file');
+
+      _parseTelegramJson();
+
+      _listUserId();
+    }
+
 
     if (verbose) print('Parse Telegram JSON file');
     _parseTelegramJson();
