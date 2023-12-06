@@ -36,6 +36,8 @@ class SourceWhatsApp extends SignalImport {
 
     if (verbose) print('Get all WhatsApp Exports');
 
+    signalBackupDecrypt();
+
     whatsappExports!.listSync().forEach((whatsappExport) {
       if (whatsappExport is File && whatsappExport.path.endsWith('.txt')) {
         _parseWhatsappExport(whatsappExport);

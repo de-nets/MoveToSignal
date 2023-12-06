@@ -9,10 +9,11 @@ class SignalImport {
   final List<SignalMessage> _signalMessages = [];
   final Map<int, SignalThread> _signalThreads = {};
   File? signalBackupFile;
-  final Directory signalBackupFolder = Directory('./SignalBackupDecryptFolder');
+  Directory _signalBackupDecryptFolder =
+      Directory('./SignalBackupDecryptFolder');
   String signalBackupKey = '';
   String signalPhoneNumber = '';
-  late Database database;
+  Database? _database;
   int signalUserID = 0;
   bool verbose = false;
 
@@ -41,6 +42,10 @@ class SignalImport {
       print('--signalBackup=${signalBackupFile!.path} file not found');
       exit(1);
     }
+
+    _signalBackupDecryptFolder = Directory(path.join(
+        path.dirname(signalBackupFile!.path), _signalBackupDecryptFolder.path));
+
     if (signalBackupKey.isEmpty) {
       print('Missing argument --signalBackupKey');
       exit(1);
@@ -49,26 +54,13 @@ class SignalImport {
       print('Missing argument --signalPhoneNumber');
       exit(1);
     }
+  }
 
-    if (verbose) print('Prepare Signal backup folder');
-
-    if (signalBackupFolder.existsSync()) {
-      signalBackupFolder.deleteSync(recursive: true);
-    }
-    signalBackupFolder.createSync();
-
-    if (verbose) print('Decrypt Signal backup');
-
-    Process.runSync('signalbackup-tools', [
-      signalBackupFile!.path,
-      signalBackupKey,
-      '--output',
-      signalBackupFolder.path,
-    ]);
-
+  void signalDbOpen() {
     if (verbose) print('Check the database');
 
-    if (!File('${signalBackupFolder.path}/database.sqlite').existsSync()) {
+    if (!File('${_signalBackupDecryptFolder.path}/database.sqlite')
+        .existsSync()) {
       print(
           'No database was found. Check backup file, key and folder arguments!');
       exit(1);
@@ -76,8 +68,8 @@ class SignalImport {
 
     if (verbose) print('Open the database');
 
-    database = sqlite3.open(
-      '${signalBackupFolder.path}/database.sqlite',
+    _database = sqlite3.open(
+      '${_signalBackupDecryptFolder.path}/database.sqlite',
       mode: OpenMode.readWrite,
     );
 
@@ -91,6 +83,54 @@ class SignalImport {
     }
 
     if (verbose) print('Found recipient ID: $signalUserID');
+  }
+
+  void signalDbClose() {
+    if (verbose) print('Close the database');
+
+    _database?.dispose();
+  }
+
+  void signalBackupDecrypt() {
+    if (verbose) print('Prepare Signal backup folder');
+
+    if (_signalBackupDecryptFolder.existsSync()) {
+      _signalBackupDecryptFolder.deleteSync(recursive: true);
+    }
+    _signalBackupDecryptFolder.createSync();
+
+    if (verbose) print('Decrypt Signal backup');
+
+    Process.runSync('signalbackup-tools', [
+      signalBackupFile!.path,
+      signalBackupKey,
+      '--output',
+      _signalBackupDecryptFolder.path,
+    ]);
+  }
+
+  void signalBackupEncrypt() {
+    final signalBackup = path.join(path.dirname(signalBackupFile!.path),
+        '${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
+
+    if (verbose) {
+      print(
+          'Encrypt Signal backup as: ${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
+    }
+
+    Process.runSync('signalbackup-tools', [
+      _signalBackupDecryptFolder.path,
+      '--output',
+      signalBackup,
+      '--opassword',
+      signalBackupKey,
+    ]);
+
+    if (verbose) print('Clean up');
+
+    if (_signalBackupDecryptFolder.existsSync()) {
+      _signalBackupDecryptFolder.deleteSync(recursive: true);
+    }
   }
 
   void signalAddMessage(SignalMessage signalMessage) {
@@ -123,6 +163,10 @@ class SignalImport {
   }
 
   void signalImport() {
+    if (_database == null) {
+      signalDbOpen();
+    }
+
     if (verbose) {
       print('Start Signal database import');
       print('Import ${_signalMessages.length} messages');
@@ -130,7 +174,7 @@ class SignalImport {
     }
 
     // Prepare a statement to run it multiple times:
-    final messageImport = database.prepare(
+    final messageImport = _database!.prepare(
       'INSERT INTO message '
       '('
       'date_sent,date_received,date_server,thread_id,from_recipient_id,from_device_id,'
@@ -180,7 +224,7 @@ class SignalImport {
     if (verbose) print('Update threads');
 
     // Prepare a statement to run it multiple times:
-    final threadUpdate = database.prepare(
+    final threadUpdate = _database!.prepare(
       'UPDATE thread '
       'SET '
       'date=?,'
@@ -202,35 +246,17 @@ class SignalImport {
       ]);
     }
 
-    if (verbose) print('Close the database');
+    signalDbClose();
 
-    database.dispose();
-
-    final signalBackup = path.join(path.dirname(signalBackupFile!.path),
-        '${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
-
-    if (verbose) {
-      print(
-          'Encrypt Signal backup as: ${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
-    }
-
-    Process.runSync('signalbackup-tools', [
-      signalBackupFolder.path,
-      '--output',
-      signalBackup,
-      '--opassword',
-      signalBackupKey,
-    ]);
-
-    if (verbose) print('Clean up');
-
-    if (signalBackupFolder.existsSync()) {
-      signalBackupFolder.deleteSync(recursive: true);
-    }
+    signalBackupEncrypt();
   }
 
   int signalGetRecipientID(String signalPhoneNumber) {
-    ResultSet results = database.select(
+    if (_database == null) {
+      signalDbOpen();
+    }
+
+    ResultSet results = _database!.select(
         'select _id from recipient where e164 = "$signalPhoneNumber" limit 1;');
 
     if (results.isEmpty) {
@@ -246,7 +272,11 @@ class SignalImport {
   }
 
   int signalGetThreadID(int signalRecipientID) {
-    ResultSet results = database.select(
+    if (_database == null) {
+      signalDbOpen();
+    }
+
+    ResultSet results = _database!.select(
         'select _id from thread where recipient_id = $signalRecipientID limit 1;');
 
     if (results.isEmpty) {
