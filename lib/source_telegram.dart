@@ -71,9 +71,47 @@ class SourceTelegram extends SignalImport {
       _listUserId();
     }
 
+    if (telegramMode == 'Prepare') {
+      if (verbose) print('Run in Telegram prepare mode');
 
-    if (verbose) print('Parse Telegram JSON file');
-    _parseTelegramJson();
+      if (verbose) print('Check missing prepare Telegram arguments');
+
+      if (telegramJson == null) {
+        print('Missing argument --telegramJson');
+        return;
+      }
+
+      if (!telegramJson!.existsSync()) {
+        print('--telegramJson=${telegramJson!.path} file not found');
+        return;
+      }
+
+      if (verbose) print('Parse Telegram JSON file');
+
+      _parseTelegramJson();
+
+      if (verbose) print('Write parsed Telegram JSON to tmp folder');
+
+      _writeTelegramExport();
+
+      // TODO: Add helpful message here.
+      print('');
+      print('');
+      print('Messages threads exported to: ${_telegramExportsFolder.path}');
+      print('');
+      print(
+          'Please review the all .txt files and make sure to file names start with the contact phone number the user uses with Signal.');
+      print(
+          'At this point you can also merge files into one, if a user had multiple Telegram identities.');
+      print('Please delete all files you don\'t want to import.');
+      print('');
+      print('A valid file name looks like: +4912345678-Contact Name.txt');
+      print(
+          'The phone number needs to in international format starting with + and must only contain numbers.');
+      print('');
+      print('Once you are done, you can start the import process.');
+      print('');
+    }
 
   }
 
