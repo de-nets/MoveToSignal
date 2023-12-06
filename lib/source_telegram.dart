@@ -200,4 +200,37 @@ class SourceTelegram extends SignalImport {
       }
     }
   }
+
+  void _writeTelegramExport() {
+    if (verbose) print('Create Telegram export folder.');
+
+    if (_telegramExportsFolder.existsSync()) {
+      _telegramExportsFolder.deleteSync(recursive: true);
+    }
+
+    _telegramExportsFolder.createSync();
+
+    if (verbose) print('Export Telegram threads to files.');
+
+    for (final telegramThread in _telegramThreads) {
+      String fileName = telegramThread.phoneNumber;
+      if (fileName.isEmpty) {
+        fileName = telegramThread.fromId;
+      }
+
+      fileName = '$fileName-${telegramThread.name}.txt';
+
+      final filePath = path.join(_telegramExportsFolder.path, fileName);
+      final export = File(filePath).openSync(mode: FileMode.writeOnlyAppend);
+
+      if (verbose) print('Export: $fileName');
+
+      for (final message in telegramThread.messages) {
+        export.writeStringSync(
+            "${message.date}|${message.received}|${message.from}|${message.text}\n");
+      }
+
+      export.closeSync();
+    }
+  }
 }
