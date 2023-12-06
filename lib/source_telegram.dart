@@ -53,7 +53,13 @@ class SourceTelegram extends SignalImport {
     if (verbose) print('Parse Telegram JSON file');
     _parseTelegramJson();
 
-    signalImport();
+  }
+
+  void _listUserId() {
+    for (final telegramThread in _telegramThreads) {
+      print(
+          '${telegramThread.fromId}-${telegramThread.phoneNumber}-${telegramThread.name}');
+    }
   }
 
   void _parseTelegramJson() {
