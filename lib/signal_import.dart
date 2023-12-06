@@ -9,7 +9,7 @@ class SignalImport {
   final List<SignalMessage> _signalMessages = [];
   final Map<int, SignalThread> _signalThreads = {};
   File? signalBackupFile;
-  final Directory _signalBackupDecryptFolder =
+  Directory _signalBackupDecryptFolder =
       Directory('./SignalBackupDecryptFolder');
   String signalBackupKey = '';
   String signalPhoneNumber = '';
@@ -42,6 +42,10 @@ class SignalImport {
       print('--signalBackup=${signalBackupFile!.path} file not found');
       exit(1);
     }
+
+    _signalBackupDecryptFolder = Directory(path.join(
+        path.dirname(signalBackupFile!.path), _signalBackupDecryptFolder.path));
+
     if (signalBackupKey.isEmpty) {
       print('Missing argument --signalBackupKey');
       exit(1);
