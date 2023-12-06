@@ -12,7 +12,7 @@ class SignalImport {
   final Directory signalBackupFolder = Directory('./SignalBackupDecryptFolder');
   String signalBackupKey = '';
   String signalPhoneNumber = '';
-  late Database database;
+  late Database _database;
   int signalUserID = 0;
   bool verbose = false;
 
@@ -76,7 +76,7 @@ class SignalImport {
 
     if (verbose) print('Open the database');
 
-    database = sqlite3.open(
+    _database = sqlite3.open(
       '${signalBackupFolder.path}/database.sqlite',
       mode: OpenMode.readWrite,
     );
@@ -130,7 +130,7 @@ class SignalImport {
     }
 
     // Prepare a statement to run it multiple times:
-    final messageImport = database.prepare(
+    final messageImport = _database.prepare(
       'INSERT INTO message '
       '('
       'date_sent,date_received,date_server,thread_id,from_recipient_id,from_device_id,'
@@ -180,7 +180,7 @@ class SignalImport {
     if (verbose) print('Update threads');
 
     // Prepare a statement to run it multiple times:
-    final threadUpdate = database.prepare(
+    final threadUpdate = _database.prepare(
       'UPDATE thread '
       'SET '
       'date=?,'
@@ -204,7 +204,7 @@ class SignalImport {
 
     if (verbose) print('Close the database');
 
-    database.dispose();
+    _database.dispose();
 
     final signalBackup = path.join(path.dirname(signalBackupFile!.path),
         '${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
@@ -230,7 +230,7 @@ class SignalImport {
   }
 
   int signalGetRecipientID(String signalPhoneNumber) {
-    ResultSet results = database.select(
+    ResultSet results = _database.select(
         'select _id from recipient where e164 = "$signalPhoneNumber" limit 1;');
 
     if (results.isEmpty) {
@@ -246,7 +246,7 @@ class SignalImport {
   }
 
   int signalGetThreadID(int signalRecipientID) {
-    ResultSet results = database.select(
+    ResultSet results = _database.select(
         'select _id from thread where recipient_id = $signalRecipientID limit 1;');
 
     if (results.isEmpty) {
