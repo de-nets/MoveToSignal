@@ -49,22 +49,6 @@ class SignalImport {
       print('Missing argument --signalPhoneNumber');
       exit(1);
     }
-
-    if (verbose) print('Prepare Signal backup folder');
-
-    if (signalBackupFolder.existsSync()) {
-      signalBackupFolder.deleteSync(recursive: true);
-    }
-    signalBackupFolder.createSync();
-
-    if (verbose) print('Decrypt Signal backup');
-
-    Process.runSync('signalbackup-tools', [
-      signalBackupFile!.path,
-      signalBackupKey,
-      '--output',
-      signalBackupFolder.path,
-    ]);
   }
 
   void signalDbOpen() {
@@ -99,6 +83,48 @@ class SignalImport {
     if (verbose) print('Close the database');
 
     _database?.dispose();
+  }
+
+  void signalBackupDecrypt() {
+    if (verbose) print('Prepare Signal backup folder');
+
+    if (signalBackupFolder.existsSync()) {
+      signalBackupFolder.deleteSync(recursive: true);
+    }
+    signalBackupFolder.createSync();
+
+    if (verbose) print('Decrypt Signal backup');
+
+    Process.runSync('signalbackup-tools', [
+      signalBackupFile!.path,
+      signalBackupKey,
+      '--output',
+      signalBackupFolder.path,
+    ]);
+  }
+
+  void signalBackupEncrypt() {
+    final signalBackup = path.join(path.dirname(signalBackupFile!.path),
+        '${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
+
+    if (verbose) {
+      print(
+          'Encrypt Signal backup as: ${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
+    }
+
+    Process.runSync('signalbackup-tools', [
+      signalBackupFolder.path,
+      '--output',
+      signalBackup,
+      '--opassword',
+      signalBackupKey,
+    ]);
+
+    if (verbose) print('Clean up');
+
+    if (signalBackupFolder.existsSync()) {
+      signalBackupFolder.deleteSync(recursive: true);
+    }
   }
 
   void signalAddMessage(SignalMessage signalMessage) {
@@ -216,27 +242,7 @@ class SignalImport {
 
     signalDbClose();
 
-    final signalBackup = path.join(path.dirname(signalBackupFile!.path),
-        '${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
-
-    if (verbose) {
-      print(
-          'Encrypt Signal backup as: ${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
-    }
-
-    Process.runSync('signalbackup-tools', [
-      signalBackupFolder.path,
-      '--output',
-      signalBackup,
-      '--opassword',
-      signalBackupKey,
-    ]);
-
-    if (verbose) print('Clean up');
-
-    if (signalBackupFolder.existsSync()) {
-      signalBackupFolder.deleteSync(recursive: true);
-    }
+    signalBackupEncrypt();
   }
 
   int signalGetRecipientID(String signalPhoneNumber) {
