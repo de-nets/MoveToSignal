@@ -12,7 +12,7 @@ class SignalImport {
   final Directory signalBackupFolder = Directory('./SignalBackupDecryptFolder');
   String signalBackupKey = '';
   String signalPhoneNumber = '';
-  late Database _database;
+  Database? _database;
   int signalUserID = 0;
   bool verbose = false;
 
@@ -98,7 +98,7 @@ class SignalImport {
   void signalDbClose() {
     if (verbose) print('Close the database');
 
-    _database.dispose();
+    _database?.dispose();
   }
 
   void signalAddMessage(SignalMessage signalMessage) {
@@ -131,7 +131,9 @@ class SignalImport {
   }
 
   void signalImport() {
-    signalDbOpen();
+    if (_database == null) {
+      signalDbOpen();
+    }
 
     if (verbose) {
       print('Start Signal database import');
@@ -140,7 +142,7 @@ class SignalImport {
     }
 
     // Prepare a statement to run it multiple times:
-    final messageImport = _database.prepare(
+    final messageImport = _database!.prepare(
       'INSERT INTO message '
       '('
       'date_sent,date_received,date_server,thread_id,from_recipient_id,from_device_id,'
@@ -190,7 +192,7 @@ class SignalImport {
     if (verbose) print('Update threads');
 
     // Prepare a statement to run it multiple times:
-    final threadUpdate = _database.prepare(
+    final threadUpdate = _database!.prepare(
       'UPDATE thread '
       'SET '
       'date=?,'
@@ -238,7 +240,11 @@ class SignalImport {
   }
 
   int signalGetRecipientID(String signalPhoneNumber) {
-    ResultSet results = _database.select(
+    if (_database == null) {
+      signalDbOpen();
+    }
+
+    ResultSet results = _database!.select(
         'select _id from recipient where e164 = "$signalPhoneNumber" limit 1;');
 
     if (results.isEmpty) {
@@ -254,7 +260,11 @@ class SignalImport {
   }
 
   int signalGetThreadID(int signalRecipientID) {
-    ResultSet results = _database.select(
+    if (_database == null) {
+      signalDbOpen();
+    }
+
+    ResultSet results = _database!.select(
         'select _id from thread where recipient_id = $signalRecipientID limit 1;');
 
     if (results.isEmpty) {
