@@ -9,7 +9,8 @@ class SignalImport {
   final List<SignalMessage> _signalMessages = [];
   final Map<int, SignalThread> _signalThreads = {};
   File? signalBackupFile;
-  final Directory signalBackupFolder = Directory('./SignalBackupDecryptFolder');
+  final Directory signalBackupDecryptFolder =
+      Directory('./SignalBackupDecryptFolder');
   String signalBackupKey = '';
   String signalPhoneNumber = '';
   Database? _database;
@@ -54,7 +55,8 @@ class SignalImport {
   void signalDbOpen() {
     if (verbose) print('Check the database');
 
-    if (!File('${signalBackupFolder.path}/database.sqlite').existsSync()) {
+    if (!File('${signalBackupDecryptFolder.path}/database.sqlite')
+        .existsSync()) {
       print(
           'No database was found. Check backup file, key and folder arguments!');
       exit(1);
@@ -63,7 +65,7 @@ class SignalImport {
     if (verbose) print('Open the database');
 
     _database = sqlite3.open(
-      '${signalBackupFolder.path}/database.sqlite',
+      '${signalBackupDecryptFolder.path}/database.sqlite',
       mode: OpenMode.readWrite,
     );
 
@@ -88,10 +90,10 @@ class SignalImport {
   void signalBackupDecrypt() {
     if (verbose) print('Prepare Signal backup folder');
 
-    if (signalBackupFolder.existsSync()) {
-      signalBackupFolder.deleteSync(recursive: true);
+    if (signalBackupDecryptFolder.existsSync()) {
+      signalBackupDecryptFolder.deleteSync(recursive: true);
     }
-    signalBackupFolder.createSync();
+    signalBackupDecryptFolder.createSync();
 
     if (verbose) print('Decrypt Signal backup');
 
@@ -99,7 +101,7 @@ class SignalImport {
       signalBackupFile!.path,
       signalBackupKey,
       '--output',
-      signalBackupFolder.path,
+      signalBackupDecryptFolder.path,
     ]);
   }
 
@@ -113,7 +115,7 @@ class SignalImport {
     }
 
     Process.runSync('signalbackup-tools', [
-      signalBackupFolder.path,
+      signalBackupDecryptFolder.path,
       '--output',
       signalBackup,
       '--opassword',
@@ -122,8 +124,8 @@ class SignalImport {
 
     if (verbose) print('Clean up');
 
-    if (signalBackupFolder.existsSync()) {
-      signalBackupFolder.deleteSync(recursive: true);
+    if (signalBackupDecryptFolder.existsSync()) {
+      signalBackupDecryptFolder.deleteSync(recursive: true);
     }
   }
 
