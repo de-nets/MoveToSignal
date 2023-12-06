@@ -65,7 +65,9 @@ class SignalImport {
       '--output',
       signalBackupFolder.path,
     ]);
+  }
 
+  void signalDbOpen() {
     if (verbose) print('Check the database');
 
     if (!File('${signalBackupFolder.path}/database.sqlite').existsSync()) {
@@ -91,6 +93,12 @@ class SignalImport {
     }
 
     if (verbose) print('Found recipient ID: $signalUserID');
+  }
+
+  void signalDbClose() {
+    if (verbose) print('Close the database');
+
+    _database.dispose();
   }
 
   void signalAddMessage(SignalMessage signalMessage) {
@@ -123,6 +131,8 @@ class SignalImport {
   }
 
   void signalImport() {
+    signalDbOpen();
+
     if (verbose) {
       print('Start Signal database import');
       print('Import ${_signalMessages.length} messages');
@@ -202,9 +212,7 @@ class SignalImport {
       ]);
     }
 
-    if (verbose) print('Close the database');
-
-    _database.dispose();
+    signalDbClose();
 
     final signalBackup = path.join(path.dirname(signalBackupFile!.path),
         '${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
