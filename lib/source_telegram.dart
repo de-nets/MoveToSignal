@@ -48,7 +48,6 @@ class SourceTelegram extends SignalImport {
 
     _telegramExportsFolder = Directory(path.join(telegramExports, 'telegram'));
 
-//    super.run(arguments);
     if (telegramMode == 'ListUser') {
       if (verbose) print('Run in Telegram list user mode');
 
@@ -113,6 +112,13 @@ class SourceTelegram extends SignalImport {
       print('');
     }
 
+    if (telegramMode == 'Import') {
+      if (verbose) print('Run in Telegram import mode');
+
+//    super.run(arguments);
+
+      // signalImport();
+    }
   }
 
   void _listUserId() {
