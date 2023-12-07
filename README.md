@@ -107,6 +107,7 @@ Import messages from other apps like WhatsApp to Signal.
 --command=
     [ImportWhatsApp] For WhatsApp exports (default)
     [SignalDecrypt] Just to decrypt Signal backup file
+    [SignalEncrypt] Just to encrypt Signal backup file
 
 --signalBackup=
     Path to Signal backup file

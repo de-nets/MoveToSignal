@@ -29,6 +29,13 @@ void main(List<String> arguments) {
       signalDecrypt.signalBackupDecrypt();
 
       break;
+    case 'SignalEncrypt':
+      final signalEncrypt = SignalImport();
+      signalEncrypt.verbose = verbose;
+      signalEncrypt.run(arguments);
+      signalEncrypt.signalBackupEncrypt();
+
+      break;
     default:
       print('Invalid argument --command=$command');
   }
