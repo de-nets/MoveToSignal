@@ -188,27 +188,52 @@ class SignalImport {
     var counter = 0;
     var step = (_signalMessages.length / 10).ceil();
     var steps = 1;
+    var timeOffset = 1;
+    var signalMessageImportSuccess = false;
     for (final signalMessage in _signalMessages) {
-      messageImport.execute([
-        signalMessage.dateSent,
-        signalMessage.dateReceived,
-        signalMessage.dateServer,
-        signalMessage.threadId,
-        signalMessage.fromRecipientId,
-        signalMessage.fromDeviceId,
-        signalMessage.toRecipientId,
-        signalMessage.type,
-        signalMessage.body,
-        signalMessage.read,
-        signalMessage.mType,
-        signalMessage.st,
-        signalMessage.receiptTimestamp,
-        signalMessage.hasDeliveryReceipt,
-        signalMessage.hasReadReceipt,
-        signalMessage.unidentified,
-        signalMessage.reactionsLastSeen,
-        signalMessage.notifiedTimestamp,
-      ]);
+      signalMessageImportSuccess = false;
+      // Loop until success
+      while (!signalMessageImportSuccess) {
+        // Try to write signalMessage to database
+        try {
+          messageImport.execute([
+            signalMessage.dateSent,
+            signalMessage.dateReceived,
+            signalMessage.dateServer,
+            signalMessage.threadId,
+            signalMessage.fromRecipientId,
+            signalMessage.fromDeviceId,
+            signalMessage.toRecipientId,
+            signalMessage.type,
+            signalMessage.body,
+            signalMessage.read,
+            signalMessage.mType,
+            signalMessage.st,
+            signalMessage.receiptTimestamp,
+            signalMessage.hasDeliveryReceipt,
+            signalMessage.hasReadReceipt,
+            signalMessage.unidentified,
+            signalMessage.reactionsLastSeen,
+            signalMessage.notifiedTimestamp,
+          ]);
+        } catch (e) {
+          // On error add time offset to dateSent
+          signalMessageImportSuccess = false;
+          signalMessage.dateSent = signalMessage.dateSent! + timeOffset;
+
+          // Increase time offset to reduce chance of "UNIQUE constraint failed"
+          timeOffset++;
+
+          // It's unlikely that 200 message in a row have the same timestamp and we don't want to change the time to much.
+          if (timeOffset == 200) {
+            timeOffset = 1;
+          }
+          continue;
+        }
+
+        // All good
+        signalMessageImportSuccess = true;
+      }
 
       if (!verbose) continue;
 
