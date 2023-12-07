@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:path/path.dart' as path;
 import 'package:move_to_signal/signal_import.dart';
 import 'package:move_to_signal/signal_message.dart';
@@ -103,9 +102,6 @@ class SourceWhatsApp extends SignalImport {
     // Init addMessage as false to ignore invalid messages
     bool addMessage = false;
 
-    final random = Random();
-    var lastMessageTimestamp = 0;
-
     for (final line in messages) {
       var messageDateTime = _getMessageDate(line);
 
@@ -116,16 +112,6 @@ class SourceWhatsApp extends SignalImport {
         // Just add message and go to next line
         signalMessage.body = "${signalMessage.body}\n${line.trim()}";
         continue;
-      }
-
-      messageDateTime += random.nextInt(500);
-
-      // Check new message date time is the same as last and if so add some time
-      if (lastMessageTimestamp == messageDateTime ||
-          signalMessage.messageDateTime > messageDateTime) {
-        messageDateTime = signalMessage.messageDateTime + random.nextInt(5000);
-      } else {
-        lastMessageTimestamp = messageDateTime;
       }
 
       // Only push valid messages
