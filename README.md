@@ -140,11 +140,6 @@ The new WhatsApp macOS App has a more usable format [01.12.23, 23:59:42] for the
 
 Please open an issue with a small anonymized sample export and your device language. Or better open a PR with a fix. :)
 
-### Import stops with error "Unhandled exception: UNIQUE constraint failed"
-
-This happens because the Android export has only hours and minutes without seconds for a message and the resulting timestamp is the same for all messages sent in the time frame of this minute. I try to work around that by adding a few seconds randomly if the new message has the same timestamp as the last, but with mixed success.
-But you can rerun the script as often as you like until no error occurs.
-
 ## Sponsor this project
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/movetosignal/5)
