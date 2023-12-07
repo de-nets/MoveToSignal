@@ -16,6 +16,8 @@ class SignalImport {
   Database? _database;
   int signalUserID = 0;
   bool verbose = false;
+  bool signalBackupNoDecrypt = false;
+  bool signalBackupNoEncrypt = false;
 
   run(List<String> arguments) {
     // Read all arguments
@@ -28,6 +30,12 @@ class SignalImport {
       }
       if (argument.startsWith('--signalPhoneNumber=')) {
         signalPhoneNumber = argument.split('=').last;
+      }
+      if (argument == '--signalBackupNoDecrypt') {
+        signalBackupNoDecrypt = true;
+      }
+      if (argument == '--signalBackupNoEncrypt') {
+        signalBackupNoEncrypt = true;
       }
     }
 
@@ -92,6 +100,10 @@ class SignalImport {
   }
 
   void signalBackupDecrypt() {
+    if (signalBackupNoDecrypt) {
+      return;
+    }
+
     if (verbose) print('Prepare Signal backup folder');
 
     if (_signalBackupDecryptFolder.existsSync()) {
@@ -110,6 +122,10 @@ class SignalImport {
   }
 
   void signalBackupEncrypt() {
+    if (signalBackupNoEncrypt) {
+      return;
+    }
+
     final signalBackup = path.join(path.dirname(signalBackupFile!.path),
         '${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
 

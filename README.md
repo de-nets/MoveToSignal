@@ -115,6 +115,12 @@ Import messages from other apps like WhatsApp to Signal.
 --signalBackupKey=
     Signal 30 digit backup passphrase like 123451234512345123451234512345
 
+--signalBackupNoDecrypt
+    Don't decrypt Signal backup, useful when importing messages from multiple sources. (false by default)
+
+--signalBackupNoEncrypt
+    Don't encrypt Signal backup, useful when importing messages from multiple sources. (false by default)
+
 --signalPhoneNumber=
     Your Signal account phone number
 
