@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:move_to_signal/model/signal_message.dart';
 import 'package:move_to_signal/model/signal_thread.dart';
@@ -127,7 +128,7 @@ class Signal {
     }
 
     final signalBackup = path.join(path.dirname(signalBackupFile!.path),
-        '${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
+        'signal-${DateFormat('yyyy-MM-dd-HH-mm-ss').format(DateTime.now())}.backup');
 
     if (verbose) {
       print(
