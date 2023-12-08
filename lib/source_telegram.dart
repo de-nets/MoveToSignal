@@ -118,9 +118,21 @@ class SourceTelegram extends SignalImport {
     if (telegramMode == 'Import') {
       if (verbose) print('Run in Telegram import mode');
 
-//    super.run(arguments);
+      if (!_telegramExportsFolder.existsSync()) {
+        print(
+            'Folder $_telegramExportsFolder not found. Did you run prepare mode first?');
+        return;
+      }
 
-      // signalImport();
+      super.run(arguments);
+
+      _telegramExportsFolder.listSync().forEach((telegramExport) {
+        if (telegramExport is File && telegramExport.path.endsWith('.txt')) {
+          _parseTelegramExport(telegramExport);
+        }
+      });
+
+      signalImport();
     }
   }
 
