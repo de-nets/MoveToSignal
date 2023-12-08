@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:move_to_signal/signal_message.dart';
 import 'package:move_to_signal/telegram_message.dart';
 import 'package:move_to_signal/telegram_thread.dart';
 import 'package:path/path.dart' as path;
@@ -127,6 +128,66 @@ class SourceTelegram extends SignalImport {
     for (final telegramThread in _telegramThreads) {
       print(
           '${telegramThread.fromId}-${telegramThread.phoneNumber}-${telegramThread.name}');
+    }
+  }
+
+  void _parseTelegramExport(File telegramExport) {
+    if (verbose) {
+      print('Parse Telegram export: ${path.basename(telegramExport.path)}');
+    }
+
+    var filename = path.basenameWithoutExtension(telegramExport.path);
+    var filenameParts = filename.split('-');
+
+    if (filenameParts.length != 2) {
+      print('File name format error ${telegramExport.path}');
+      return;
+    }
+
+    // Get contact date from filename
+    final contactNumber = filenameParts[0];
+    final contactSignalId = signalGetRecipientID(contactNumber);
+    if (contactSignalId == 0) {
+      print(
+          'No RecipientID was found for contact "$contactNumber" in Signal backup');
+      return;
+    }
+
+    final contactSignalThreadId = signalGetThreadID(contactSignalId);
+    if (contactSignalThreadId == 0) {
+      print(
+          'No ThreadId was found for contact "$contactNumber" in Signal backup');
+      return;
+    }
+
+    // Init new SignalMessage
+    var signalMessage = SignalMessage();
+
+    // Read WhatsApp export file
+    final messages = jsonDecode(telegramExport.readAsStringSync());
+
+    for (final message in messages) {
+      signalMessage.messageDateTime = message['date'] * 1000;
+      signalMessage.body = message['text'];
+
+      if (message['received']) {
+        // Message was received
+
+        signalMessage.threadId = contactSignalThreadId;
+        signalMessage.fromRecipientId = contactSignalId;
+        signalMessage.toRecipientId = signalUserID;
+        signalMessage.setReceived();
+      } else {
+        // Message was sent
+
+        signalMessage.threadId = contactSignalThreadId;
+        signalMessage.fromRecipientId = signalUserID;
+        signalMessage.toRecipientId = contactSignalId;
+        signalMessage.setSend();
+      }
+
+      signalAddMessage(signalMessage);
+      signalMessage = SignalMessage();
     }
   }
 
