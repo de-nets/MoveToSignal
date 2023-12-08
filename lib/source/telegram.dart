@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:move_to_signal/signal_message.dart';
-import 'package:move_to_signal/telegram_message.dart';
-import 'package:move_to_signal/telegram_thread.dart';
+import 'package:move_to_signal/model/signal_message.dart';
+import 'package:move_to_signal/model/telegram_message.dart';
+import 'package:move_to_signal/model/telegram_thread.dart';
 import 'package:path/path.dart' as path;
-import 'package:move_to_signal/signal_import.dart';
+import 'package:move_to_signal/import/signal.dart';
 
-class SourceTelegram extends SignalImport {
+class Telegram extends Signal {
   String telegramMode = 'Prepare';
   String telegramExports = '';
   Directory _telegramExportsFolder = Directory('./TelegramExportsFolder');

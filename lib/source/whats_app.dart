@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
-import 'package:move_to_signal/signal_import.dart';
-import 'package:move_to_signal/signal_message.dart';
+import 'package:move_to_signal/import/signal.dart';
+import 'package:move_to_signal/model/signal_message.dart';
 
-class SourceWhatsApp extends SignalImport {
+class WhatsApp extends Signal {
   Directory? whatsappExports;
 
   @override
