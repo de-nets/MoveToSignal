@@ -269,19 +269,22 @@ class SignalImport {
       'UPDATE thread '
       'SET '
       'date=?,'
-      'last_seen=?,'
+      'meaningful_messages=1,'
       'snippet=?,'
-      'snippet_type=?'
-      'WHERE _id=? and date > ?',
+      'snippet_type=?,'
+      'status=-1,'
+      'last_seen=?,'
+      'active=1 '
+      'WHERE _id=? AND (date < ? OR active=0)',
     );
 
     // Update all threads
     for (final signalThread in _signalThreads.entries) {
       threadUpdate.execute([
         signalThread.value.date,
-        signalThread.value.lastSeen,
         signalThread.value.snippet,
         signalThread.value.snippetType,
+        signalThread.value.lastSeen,
         signalThread.value.threadId,
         signalThread.value.date,
       ]);
