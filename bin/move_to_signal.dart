@@ -1,6 +1,6 @@
 import 'package:move_to_signal/import/signal.dart';
 import 'package:move_to_signal/source/telegram.dart';
-import 'package:move_to_signal/source/whats_app.dart';
+import 'package:move_to_signal/source/whats_app_export.dart';
 
 void main(List<String> arguments) {
   String command = 'ImportWhatsApp';
@@ -23,8 +23,8 @@ void main(List<String> arguments) {
       telegramImport.run(arguments);
 
       break;
-    case 'ImportWhatsApp':
-      final whatsAppImport = WhatsApp();
+    case 'ImportWhatsAppExports':
+      final whatsAppImport = WhatsAppExport();
       whatsAppImport.verbose = verbose;
       whatsAppImport.run(arguments);
 

@@ -3,7 +3,7 @@ import 'package:path/path.dart' as path;
 import 'package:move_to_signal/import/signal.dart';
 import 'package:move_to_signal/model/signal_message.dart';
 
-class WhatsApp extends Signal {
+class WhatsAppExport extends Signal {
   Directory? whatsappExports;
 
   @override
