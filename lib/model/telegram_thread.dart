@@ -1,4 +1,4 @@
-import 'package:move_to_signal/telegram_message.dart';
+import 'package:move_to_signal/model/telegram_message.dart';
 
 class TelegramThread {
   String name = '';

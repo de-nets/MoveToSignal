@@ -1,6 +1,6 @@
-import 'package:move_to_signal/signal_import.dart';
-import 'package:move_to_signal/source_telegram.dart';
-import 'package:move_to_signal/source_whats_app.dart';
+import 'package:move_to_signal/import/signal.dart';
+import 'package:move_to_signal/source/telegram.dart';
+import 'package:move_to_signal/source/whats_app.dart';
 
 void main(List<String> arguments) {
   String command = 'ImportWhatsApp';
@@ -18,26 +18,26 @@ void main(List<String> arguments) {
 
   switch (command) {
     case 'ImportTelegram':
-      final telegramImport = SourceTelegram();
+      final telegramImport = Telegram();
       telegramImport.verbose = verbose;
       telegramImport.run(arguments);
 
       break;
     case 'ImportWhatsApp':
-      final whatsAppImport = SourceWhatsApp();
+      final whatsAppImport = WhatsApp();
       whatsAppImport.verbose = verbose;
       whatsAppImport.run(arguments);
 
       break;
     case 'SignalDecrypt':
-      final signalDecrypt = SignalImport();
+      final signalDecrypt = Signal();
       signalDecrypt.verbose = verbose;
       signalDecrypt.run(arguments);
       signalDecrypt.signalBackupDecrypt();
 
       break;
     case 'SignalEncrypt':
-      final signalEncrypt = SignalImport();
+      final signalEncrypt = Signal();
       signalEncrypt.verbose = verbose;
       signalEncrypt.run(arguments);
       signalEncrypt.signalBackupEncrypt();

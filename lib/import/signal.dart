@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:move_to_signal/signal_message.dart';
-import 'package:move_to_signal/signal_thread.dart';
+import 'package:move_to_signal/model/signal_message.dart';
+import 'package:move_to_signal/model/signal_thread.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class SignalImport {
+class Signal {
   final List<SignalMessage> _signalMessages = [];
   final Map<int, SignalThread> _signalThreads = {};
   File? signalBackupFile;
