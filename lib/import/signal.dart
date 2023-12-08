@@ -131,8 +131,7 @@ class Signal {
         'signal-${DateFormat('yyyy-MM-dd-HH-mm-ss').format(DateTime.now())}.backup');
 
     if (verbose) {
-      print(
-          'Encrypt Signal backup as: ${path.basenameWithoutExtension(signalBackupFile!.path)}_WAImported.backup');
+      print('Encrypt Signal backup as: $signalBackup');
     }
 
     Process.runSync('signalbackup-tools', [
