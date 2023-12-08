@@ -8,7 +8,8 @@ import 'package:move_to_signal/signal_import.dart';
 class SourceTelegram extends SignalImport {
   String telegramMode = 'Prepare';
   String telegramExports = '';
-  late Directory _telegramExportsFolder;
+  Directory _telegramExportsFolder = Directory('./TelegramExportsFolder');
+
   File? telegramJson;
   final List<TelegramThread> _telegramThreads = [];
 
@@ -46,7 +47,8 @@ class SourceTelegram extends SignalImport {
       return;
     }
 
-    _telegramExportsFolder = Directory(path.join(telegramExports, 'telegram'));
+    _telegramExportsFolder =
+        Directory(path.join(telegramExports, _telegramExportsFolder.path));
 
     if (telegramMode == 'ListUser') {
       if (verbose) print('Run in Telegram list user mode');
