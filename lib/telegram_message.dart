@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class TelegramMessage {
   int date = 0;
   String from = '';
@@ -6,11 +8,11 @@ class TelegramMessage {
   bool received = true;
 
   Map<String, dynamic> toJson() => {
-        "date": date,
-        "from": from,
-        "fromId": fromId,
-        "text": text,
-        "received": received,
+        '"date"': date,
+        '"from"': jsonEncode(from),
+        '"fromId"': jsonEncode(fromId),
+        '"text"': jsonEncode(text),
+        '"received"': received,
       };
 
   @override

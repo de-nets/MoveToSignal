@@ -297,10 +297,17 @@ class SourceTelegram extends SignalImport {
 
       if (verbose) print('Export: $fileName');
 
+      export.writeStringSync("[\n");
+      var firstLine = true;
       for (final message in telegramThread.messages) {
-        export.writeStringSync(
-            "${message.date}|${message.received}|${message.from}|${message.text}\n");
+        if (!firstLine) {
+          export.writeStringSync(",\n");
+        } else {
+          firstLine = false;
+        }
+        export.writeStringSync("${message.toJson()}");
       }
+      export.writeStringSync("\n]");
 
       export.closeSync();
     }
