@@ -4,140 +4,28 @@ Import messages from other apps like Telegram or WhatsApp to Signal.
 
 ## Caveats
 
-* Only tested on Android
-* No group text support
-* The commands below were run on macOS
-* Before you begin make sure you:
-  * backup Signal before you begin
-  * have written down the 30 digit backup code
-  * still have your phone number for identity verification
-  * still remember your numerical Signal Pin
+- Only tested on Android
+- No group text support
+- The commands were run on macOS
+
+## Prerequisites
+
+See: [Install](docs/Install.md)
+
+## Prepare Signal for import
+
+See: [Signal](docs/Signal.md)
 
 ## Instructions
 
-1. Install [Dart](https://dart.dev/)
+Import messages from:
 
-2. Download/Clone this git or download arm macOS binary
-
-3. Install [signalbackup-tools](https://github.com/bepaald/signalbackup-tools)
-
-4. Make sure you have an open Signal tread for every contact you wish to import messages to. Just draft and delete a text should do the trick.
-
-5. Generate a Signal backup file on Android
-
-    ```text
-    Signal -> Settings -> Chats -> Backups -> Local Backup
-    ```
-
-6. Generate WhatApp export files on Android
-
-    ```text
-    WhatApp -> Chat -> 3 dotted menu -> more -> Export chat
-    ```
-
-    Do this for every chat you wish to import.
-
-7. Transfer the files to your computer.
-
-    Signal file will be named eg: signal-2023-12-03-12-00-00.backup  
-    WhatsApp exports will be named eg: WhatsApp Chat with (User Screen Name).txt
-
-8. Rename exports
-
-    WhatApp:
-
-    All WhatsApp export files must be renamed like:  
-    contactPhoneNumber-ThereScreenName.txt  
-
-    eg: +49123456789-Max ExampleName.txt  
-
-    You can look inside the file to copy the exact name from there.
-
-9. Create working folder like this
-
-    ```text
-    --- user/signal
-    |--- whatsapp     // directory for all whatsapp export files
-    |- signal.backup  // Signal backup file
-    ```
-
-10. Run MoveToSignal in terminal
-
-    Mac arm64 binary
-
-    ```bash
-    cd path/to/working/folder/from/step/9
-
-    path/to/MoveToSignal/move_to_signal_Darwin_arm64 \
-    --signalBackup=./signal-2023-12-03-12-00-00.backup \
-    --signalBackupKey=123451234512345123451234512345 \
-    --signalPhoneNumber=+49123456789 \
-    --whatsappExports=./whatsapp \
-    --verbose
-    ```
-
-    From source
-
-    ```bash
-    cd path/to/working/folder/from/step/9
-
-    dart run path/to/MoveToSignal/bin/move_to_signal.dart \
-    --signalBackup=./signal-2023-12-03-12-00-00.backup \
-    --signalBackupKey=123451234512345123451234512345 \
-    --signalPhoneNumber=+49123456789 \
-    --whatsappExports=./whatsapp \
-    --verbose
-    ```
-
-    Once done, a new Signal backup file is created.  
-    In the example from above  signal-2023-12-03-12-00-00_WAImported.backup  
-
-11. Copy the new Signal backup to your phone.
-
-12. Delete and reinstall the Signal app or if you know how delete all app storage.
-
-13. Restore Signal by using the new backup file.
+- [Telegram](docs/Telegram.md)
+- [WhatApp export](docs/WhatApp_Export.md)
 
 ### Available commands
 
-```text
---verbose
-    Show detailed progress
-
---command=
-    [ImportTelegram] For Telegram exports
-    [ImportWhatsApp] For WhatsApp exports (default)
-    [SignalDecrypt] Just to decrypt Signal backup file
-    [SignalEncrypt] Just to encrypt Signal backup file
-
---signalBackup=
-    Path to Signal backup file
-
---signalBackupKey=
-    Signal 30 digit backup passphrase like 123451234512345123451234512345
-
---signalBackupNoDecrypt
-    Don't decrypt Signal backup, useful when importing messages from multiple sources. (false by default)
-
---signalBackupNoEncrypt
-    Don't encrypt Signal backup, useful when importing messages from multiple sources. (false by default)
-
---signalPhoneNumber=
-    Your Signal account phone number
-
---telegramExports=
-    Path where to create the folder TelegramExportsFolder to write the Telegram export files into.
-
---telegramJson=
-    Path to the Telegram export json file
-
---telegramMode=
-    [Prepare] Prepare the import by extracting all conversations from telegramJson into separate files to review. (default)
-    [Import] Imports the files from step [Prepare] into the Signal database.
-
---whatsappExports=
-    Path to the WhatsApp export .txt file
-```
+See: [Commands](docs/Commands.md)
 
 ## Build binary from source
 
