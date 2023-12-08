@@ -96,7 +96,6 @@ class SourceTelegram extends SignalImport {
 
       _writeTelegramExport();
 
-      // TODO: Add helpful message here.
       print('');
       print('');
       print('Messages threads exported to: ${_telegramExportsFolder.path}');
