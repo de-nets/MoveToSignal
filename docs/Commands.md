@@ -6,6 +6,7 @@
 
 --command=
     [ImportTelegram] For Telegram exports
+    [ImportWhatsAppDb] For WhatsApp db import (needs decrypted db with wa-crypt-tools)
     [ImportWhatsAppExports] For WhatsApp exports (default)
     [SignalDecrypt] Just to decrypt Signal backup file
     [SignalEncrypt] Just to encrypt Signal backup file
@@ -35,6 +36,14 @@
     [Prepare] Prepare the import by extracting all conversations from telegramJson into separate files to review. (default)
     [Import] Imports the files from step [Prepare] into the Signal database.
 
+--whatsAppDb=
+    Path to the WhatsApp msgstore.db file
+
 --whatsAppExports=
-    Path to the WhatsApp export .txt files
+    [ImportWhatsAppDb] Path where the WhatsApp .txt file are written
+    [ImportWhatsAppExports] Path to the WhatsApp export .txt files
+
+--whatsAppMode=
+    [Prepare] Prepare the import by extracting all conversations from msgstore.db into separate files to review. (default)
+    [Import] Imports the files from step [Prepare] into the Signal database.
 ```

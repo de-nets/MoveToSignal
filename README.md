@@ -21,6 +21,7 @@ See: [Signal](docs/Signal.md)
 Import messages from:
 
 - [Telegram](docs/Telegram.md)
+- [WhatApp DB](docs/WhatApp_DB.md)
 - [WhatApp export](docs/WhatApp_Export.md)
 
 ### Available commands
