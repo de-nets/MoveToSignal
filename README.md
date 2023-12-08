@@ -1,6 +1,6 @@
 # MoveToSignal
 
-Import messages from other apps like WhatsApp to Signal.
+Import messages from other apps like Telegram or WhatsApp to Signal.
 
 ## Caveats
 
@@ -105,6 +105,7 @@ Import messages from other apps like WhatsApp to Signal.
     Show detailed progress
 
 --command=
+    [ImportTelegram] For Telegram exports
     [ImportWhatsApp] For WhatsApp exports (default)
     [SignalDecrypt] Just to decrypt Signal backup file
     [SignalEncrypt] Just to encrypt Signal backup file
@@ -124,8 +125,18 @@ Import messages from other apps like WhatsApp to Signal.
 --signalPhoneNumber=
     Your Signal account phone number
 
+--telegramExports=
+    Path where to create the folder TelegramExportsFolder to write the Telegram export files into.
+
+--telegramJson=
+    Path to the Telegram export json file
+
+--telegramMode=
+    [Prepare] Prepare the import by extracting all conversations from telegramJson into separate files to review. (default)
+    [Import] Imports the files from step [Prepare] into the Signal database.
+
 --whatsappExports=
-    [WhatsApp] For WhatsApp exports
+    Path to the WhatsApp export .txt file
 ```
 
 ## Build binary from source
