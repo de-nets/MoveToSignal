@@ -4,7 +4,7 @@ import 'package:move_to_signal/source/whats_app_db.dart';
 import 'package:move_to_signal/source/whats_app_export.dart';
 
 void main(List<String> arguments) {
-  String command = 'ImportWhatsApp';
+  String command = 'ImportWhatsAppExports';
   bool verbose = false;
 
   // Read all arguments

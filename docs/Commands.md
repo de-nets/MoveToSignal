@@ -6,7 +6,7 @@
 
 --command=
     [ImportTelegram] For Telegram exports
-    [ImportWhatsApp] For WhatsApp exports (default)
+    [ImportWhatsAppExports] For WhatsApp exports (default)
     [SignalDecrypt] Just to decrypt Signal backup file
     [SignalEncrypt] Just to encrypt Signal backup file
 
@@ -35,6 +35,6 @@
     [Prepare] Prepare the import by extracting all conversations from telegramJson into separate files to review. (default)
     [Import] Imports the files from step [Prepare] into the Signal database.
 
---whatsappExports=
-    Path to the WhatsApp export .txt file
+--whatsAppExports=
+    Path to the WhatsApp export .txt files
 ```
