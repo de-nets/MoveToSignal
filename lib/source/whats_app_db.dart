@@ -106,6 +106,7 @@ class WhatsAppDb extends Signal {
     ResultSet threads = _database.select(
         'SELECT _id, raw_string_jid FROM chat_view WHERE raw_string_jid like "%@s.whatsapp.net";');
 
+    if (verbose) print('Get all messages');
     for (final thread in threads) {
       // Get phone number
       final jid = thread['raw_string_jid'];
@@ -162,7 +163,7 @@ class WhatsAppDb extends Signal {
   }
 
   void _writeWhatsAppExport() {
-    if (verbose) print('Create Telegram export folder.');
+    if (verbose) print('Create WhatsApp export folder.');
 
     if (_whatsAppExportsFolder.existsSync()) {
       _whatsAppExportsFolder.deleteSync(recursive: true);
@@ -170,7 +171,7 @@ class WhatsAppDb extends Signal {
 
     _whatsAppExportsFolder.createSync();
 
-    if (verbose) print('Export Telegram threads to files.');
+    if (verbose) print('Export WhatsApp threads to files.');
 
     for (final whatsAppThread in _whatsAppThreads) {
       String fileName = whatsAppThread.phoneNumber;
