@@ -48,7 +48,7 @@ Always start by creating a [Signal](docs/Signal.md) backup.
    Please delete all files you don't want to import.
 
    All Telegram export files must be renamed like:  
-   contactPhoneNumber-ThereScreenName.txt
+   contactPhoneNumber-Screen Name.txt
 
    eg: +49123456789-Max ExampleName.txt
 
