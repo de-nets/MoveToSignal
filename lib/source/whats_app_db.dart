@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:move_to_signal/model/whats_app_message.dart';
+import 'package:move_to_signal/model/whats_app_reaction.dart';
 import 'package:move_to_signal/model/whats_app_thread.dart';
 import 'package:path/path.dart' as path;
 import 'package:move_to_signal/import/signal.dart';
@@ -106,7 +107,7 @@ class WhatsAppDb extends Signal {
     ResultSet threads = _database.select(
         'SELECT _id, raw_string_jid FROM chat_view WHERE raw_string_jid like "%@s.whatsapp.net";');
 
-    if (verbose) print('Get all messages');
+    if (verbose) print('Get all messages and reactions');
     for (final thread in threads) {
       // Get phone number
       final jid = thread['raw_string_jid'];
@@ -128,7 +129,17 @@ class WhatsAppDb extends Signal {
 
       // Get all messages for this thread
       ResultSet messages = _database.select(
-          'SELECT * FROM message WHERE chat_row_id=${whatsAppThread.id};');
+        'SELECT '
+        'message._id, '
+        'message.text_data, '
+        'message.from_me, '
+        'message.status, '
+        'message.timestamp, '
+        'message.received_timestamp, '
+        'message.receipt_server_timestamp '
+        'FROM message '
+        'WHERE message.chat_row_id=${whatsAppThread.id};',
+      );
 
       for (final message in messages) {
         final String? text = message['text_data'];
@@ -151,6 +162,34 @@ class WhatsAppDb extends Signal {
         whatsAppMessage.receivedTimestamp = message['received_timestamp'];
         whatsAppMessage.receiptServerTimestamp =
             message['receipt_server_timestamp'];
+
+        // Get all reactions for this message
+        ResultSet reactions = _database.select(
+          'SELECT '
+          'message_add_on_reaction.reaction, '
+          'message_add_on_reaction.sender_timestamp, '
+          'message_add_on.received_timestamp, '
+          'message_add_on.from_me '
+          'FROM message_add_on '
+          'LEFT JOIN message_add_on_reaction ON message_add_on_reaction.message_add_on_row_id = message_add_on._id '
+          'WHERE message_add_on.parent_message_row_id=${message['_id']};',
+        );
+
+        for (final reaction in reactions) {
+          final WhatsAppReaction whatsAppReaction = WhatsAppReaction();
+
+          whatsAppReaction.reaction = reaction['reaction'];
+          if (reaction['from_me'] == 1) {
+            whatsAppReaction.fromMe = true;
+          } else if (reaction['from_me'] == 0) {
+            whatsAppReaction.fromMe = false;
+          }
+          whatsAppReaction.sendTimestamp = reaction['sender_timestamp'];
+          whatsAppReaction.receivedTimestamp = reaction['received_timestamp'];
+
+          whatsAppMessage.reactions.add(whatsAppReaction);
+        }
+
         whatsAppThread.messages.add(whatsAppMessage);
       }
 
@@ -194,7 +233,7 @@ class WhatsAppDb extends Signal {
         } else {
           firstLine = false;
         }
-        export.writeStringSync("${message.toJson()}");
+        export.writeStringSync(message.toString());
       }
       export.writeStringSync("\n]");
 

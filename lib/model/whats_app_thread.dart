@@ -7,14 +7,12 @@ class WhatsAppThread {
   String phoneNumber = '';
   List<WhatsAppMessage> messages = [];
 
-  Map<String, dynamic> toJson() => {
+  @override
+  String toString() => {
         "id": id,
         "name": name,
         "fromId": fromId,
         "phoneNumber": phoneNumber,
         "messages": messages,
-      };
-
-  @override
-  String toString() => '$id|$name|$fromId|$phoneNumber|$messages';
+      }.toString();
 }
