@@ -315,6 +315,26 @@ class Signal {
     return 0;
   }
 
+  String? signalGetRecipientName(String signalPhoneNumber) {
+    if (_database == null) {
+      signalDbOpen();
+    }
+
+    ResultSet results = _database!.select(
+        'select system_joined_name from recipient where e164 = "$signalPhoneNumber" limit 1;');
+
+    if (results.isEmpty) {
+      return null;
+    }
+
+    var name = results.first.columnAt(0);
+    if (name is String) {
+      return name;
+    }
+
+    return null;
+  }
+
   int signalGetThreadID(int signalRecipientID) {
     if (_database == null) {
       signalDbOpen();
