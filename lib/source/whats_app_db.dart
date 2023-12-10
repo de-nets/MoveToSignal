@@ -48,6 +48,8 @@ class WhatsAppDb extends Signal {
     _whatsAppExportsFolder =
         Directory(path.join(_whatsAppExports, _whatsAppExportsFolder.path));
 
+    super.run(arguments);
+
     if (_whatsAppMode == 'Prepare') {
       if (verbose) print('Run in WhatsApp prepare mode');
 
@@ -87,6 +89,8 @@ class WhatsAppDb extends Signal {
       print('');
       print('Once you are done, you can start the import process.');
       print('');
+
+      signalDbClose();
     }
   }
 
@@ -117,6 +121,9 @@ class WhatsAppDb extends Signal {
       whatsAppThread.id = thread['_id'].toString();
       whatsAppThread.phoneNumber = '+${jidSplit[0]}';
       whatsAppThread.fromId = jid;
+
+      whatsAppThread.name =
+          signalGetRecipientName(whatsAppThread.phoneNumber) ?? '';
 
       // Get all messages for this thread
       ResultSet messages = _database.select(

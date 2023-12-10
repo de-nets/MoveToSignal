@@ -13,6 +13,9 @@ Always start by creating a [Signal](docs/Signal.md) backup.
 
    path/to/MoveToSignal/move_to_signal_Darwin_arm64 \
    --command=ImportWhatsAppDb \
+   --signalBackup=./signal-YYYY-MM-DD-HH-mm-ss.backup \
+   --signalBackupKey=123451234512345123451234512345 \
+   --signalPhoneNumber=+49123456789 \
    --whatsAppDb="path/to/msgstore.db" \
    --whatsAppExports=. \
    --whatsAppMode=Prepare \
@@ -26,6 +29,9 @@ Always start by creating a [Signal](docs/Signal.md) backup.
 
    dart run path/to/MoveToSignal/bin/move_to_signal.dart \
    --command=ImportWhatsAppDb \
+   --signalBackup=./signal-YYYY-MM-DD-HH-mm-ss.backup \
+   --signalBackupKey=123451234512345123451234512345 \
+   --signalPhoneNumber=+49123456789 \
    --whatsAppDb="path/to/msgstore.db" \
    --whatsAppExports=. \
    --whatsAppMode=Prepare \
@@ -33,7 +39,7 @@ Always start by creating a [Signal](docs/Signal.md) backup.
    ```
 
    A new folder named WhatsAppExportsFolder will be created for the export files.
-   WhatsApp exports will be named eg: +4912345678-.txt
+   WhatsApp exports will be named eg: +4912345678-(Screen name if found).txt
 
 3. Rename exports
 
@@ -42,7 +48,7 @@ Always start by creating a [Signal](docs/Signal.md) backup.
    Please delete all files you don't want to import.
 
    All WhatsApp export files must be renamed like:  
-   contactPhoneNumber-ThereScreenName.txt
+   contactPhoneNumber-Screen Name.txt
 
    eg: +49123456789-Max ExampleName.txt
 
