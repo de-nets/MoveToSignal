@@ -1,3 +1,5 @@
+import 'package:move_to_signal/model/signal_reaction.dart';
+
 class SignalMessage {
   int messageDateTime = 0;
   int? dateSent;
@@ -18,8 +20,10 @@ class SignalMessage {
   int unidentified = 1;
   int reactionsLastSeen = -1;
   int notifiedTimestamp = 0;
+  List<SignalReaction> reactions = [];
 
-  Map<String, dynamic> toJson() => {
+  @override
+  String toString() => {
         "dateSent": dateSent,
         "dateReceived": dateReceived,
         "dateServer": dateServer,
@@ -38,11 +42,8 @@ class SignalMessage {
         "unidentified": unidentified,
         "reactionsLastSeen": reactionsLastSeen,
         "notifiedTimestamp": notifiedTimestamp,
-      };
-
-  @override
-  String toString() =>
-      '$dateSent|$dateReceived|$dateServer|$threadId|$fromRecipientId|$fromDeviceId|$toRecipientId|$type|$body|$read|$mType|$st|$receiptTimestamp|$hasDeliveryReceipt|$hasReadReceipt|$unidentified|$reactionsLastSeen|$notifiedTimestamp';
+        "reactions": reactions,
+      }.toString();
 
   void setReceived() {
     dateSent = messageDateTime;
