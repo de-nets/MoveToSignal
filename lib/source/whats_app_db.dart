@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:move_to_signal/model/signal_reaction.dart';
 import 'package:move_to_signal/model/whats_app_message.dart';
 import 'package:move_to_signal/model/whats_app_reaction.dart';
 import 'package:move_to_signal/model/whats_app_thread.dart';
@@ -92,6 +94,26 @@ class WhatsAppDb extends Signal {
       print('');
 
       signalDbClose();
+    }
+
+    if (_whatsAppMode == 'Import') {
+      if (verbose) print('Run in WhatsApp import mode');
+
+      if (!_whatsAppExportsFolder.existsSync()) {
+        print(
+            'Folder $_whatsAppExportsFolder not found. Did you run prepare mode first?');
+        return;
+      }
+
+      super.run(arguments);
+
+      _whatsAppExportsFolder.listSync().forEach((whatsAppExport) {
+        if (whatsAppExport is File && whatsAppExport.path.endsWith('.txt')) {
+          _parseWhatsAppExport(whatsAppExport);
+        }
+      });
+
+      signalImport();
     }
   }
 
@@ -199,6 +221,99 @@ class WhatsAppDb extends Signal {
     }
 
     _database.dispose();
+  }
+
+  void _parseWhatsAppExport(File whatsAppExport) {
+    if (verbose) {
+      print('Parse WhatsApp export: ${path.basename(whatsAppExport.path)}');
+    }
+
+    var filename = path.basenameWithoutExtension(whatsAppExport.path);
+    var filenameParts = filename.split('-');
+
+    if (filenameParts.length != 2) {
+      print('File name format error ${whatsAppExport.path}');
+      return;
+    }
+
+    // Get contact date from filename
+    final contactNumber = filenameParts[0];
+    final contactSignalId = signalGetRecipientID(contactNumber);
+    if (contactSignalId == 0) {
+      print(
+          'No RecipientID was found for contact "$contactNumber" in Signal backup');
+      return;
+    }
+
+    final contactSignalThreadId = signalGetThreadID(contactSignalId);
+    if (contactSignalThreadId == 0) {
+      print(
+          'No ThreadId was found for contact "$contactNumber" in Signal backup');
+      return;
+    }
+
+    // Init new SignalMessage
+    var signalMessage = SignalMessage();
+
+    // Read WhatsApp export file
+    final messages = jsonDecode(whatsAppExport.readAsStringSync());
+
+    for (final message in messages) {
+      signalMessage.messageDateTime = message['timestamp'];
+      signalMessage.body = message['text'];
+
+      if (message['fromMe']) {
+        // Message was sent
+
+        signalMessage.threadId = contactSignalThreadId;
+        signalMessage.fromRecipientId = signalUserID;
+        signalMessage.toRecipientId = contactSignalId;
+        signalMessage.setSend();
+        signalMessage.dateSent = message['timestamp'];
+        signalMessage.dateReceived = message['receivedTimestamp'];
+        signalMessage.receiptTimestamp = message['receiptServerTimestamp'];
+      } else {
+        // Message was received
+
+        signalMessage.threadId = contactSignalThreadId;
+        signalMessage.fromRecipientId = contactSignalId;
+        signalMessage.toRecipientId = signalUserID;
+
+        signalMessage.dateSent = message['timestamp'];
+        signalMessage.dateServer = signalMessage.dateSent! + 500;
+        signalMessage.dateReceived = message['receivedTimestamp'];
+        signalMessage.receiptTimestamp = message['receiptServerTimestamp'];
+        signalMessage.notifiedTimestamp = signalMessage.dateReceived! + 500;
+        signalMessage.reactionsLastSeen =
+            signalMessage.notifiedTimestamp + 5000;
+      }
+
+      for (final reaction in message['reactions']) {
+        final signalReaction = SignalReaction();
+
+        if (reaction['fromMe'] == null ||
+            reaction['reaction'] == null ||
+            reaction['reaction'].isEmpty) {
+          continue;
+        }
+
+        signalReaction.fromMe = reaction['fromMe'];
+
+        if (signalReaction.fromMe!) {
+          signalReaction.authorId = signalUserID;
+        } else {
+          signalReaction.authorId = contactSignalId;
+        }
+        signalReaction.reaction = reaction['reaction'];
+        signalReaction.sendTimestamp = reaction['sendTimestamp'];
+        signalReaction.receivedTimestamp = reaction['receivedTimestamp'];
+
+        signalMessage.reactions.add(signalReaction);
+      }
+
+      signalAddMessage(signalMessage);
+      signalMessage = SignalMessage();
+    }
   }
 
   void _writeWhatsAppExport() {
