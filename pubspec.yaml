@@ -1,6 +1,6 @@
 name: move_to_signal
 description: Import messages from other apps like WhatsApp to Signal.
-version: 1.2.0
+version: 1.2.1
 repository: https://github.com/de-nets/MoveToSignal
 
 environment:

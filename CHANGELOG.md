@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+- Fixed some messages are not shown after WhatsApp import from DB
+
 ## 1.2.0
 
 - Added WhatsApp import from DB
