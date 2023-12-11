@@ -269,23 +269,25 @@ class WhatsAppDb extends Signal {
         signalMessage.fromRecipientId = signalUserID;
         signalMessage.toRecipientId = contactSignalId;
         signalMessage.setSend();
-        signalMessage.dateSent = message['timestamp'];
-        signalMessage.dateReceived = message['receivedTimestamp'];
-        signalMessage.receiptTimestamp = message['receiptServerTimestamp'];
+        if (message['receivedTimestamp'] != 0) {
+          signalMessage.dateReceived = message['receivedTimestamp'];
+        }
+        if (message['receiptServerTimestamp'] != 0) {
+          signalMessage.receiptTimestamp = message['receiptServerTimestamp'];
+        }
       } else {
         // Message was received
 
         signalMessage.threadId = contactSignalThreadId;
         signalMessage.fromRecipientId = contactSignalId;
         signalMessage.toRecipientId = signalUserID;
-
-        signalMessage.dateSent = message['timestamp'];
-        signalMessage.dateServer = signalMessage.dateSent! + 500;
-        signalMessage.dateReceived = message['receivedTimestamp'];
-        signalMessage.receiptTimestamp = message['receiptServerTimestamp'];
-        signalMessage.notifiedTimestamp = signalMessage.dateReceived! + 500;
-        signalMessage.reactionsLastSeen =
-            signalMessage.notifiedTimestamp + 5000;
+        signalMessage.setReceived();
+        if (message['receivedTimestamp'] != 0) {
+          signalMessage.dateReceived = message['receivedTimestamp'];
+        }
+        if (message['receiptServerTimestamp'] != 0) {
+          signalMessage.receiptTimestamp = message['receiptServerTimestamp'];
+        }
       }
 
       for (final reaction in message['reactions']) {
