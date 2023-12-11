@@ -5,7 +5,6 @@ Import messages from other apps like Telegram or WhatsApp to Signal.
 ## Caveats
 
 - Only tested on Android
-- No group text support
 - The commands were run on macOS
 
 ## Prerequisites
@@ -37,6 +36,16 @@ dart compile exe \
 bin/move_to_signal.dart \
 -o build/move_to_signal_$(uname -s)_$(uname -m)
 ```
+
+## Feature Map
+
+| Name                       | Telegram | WhatApp DB | WhatApp export |
+| :------------------------- | :------: | :--------: | :------------: |
+| All 1-on-1 text messages   |    ✅    |     ✅     |       ❌       |
+| Group chats                |    ❌    |     ❌     |       ❌       |
+| Original timestamps        |    ✅    |     ✅     |       ❌       |
+| Reactions (emoji)          |    ❌    |     ✅     |       ❌       |
+| Media (images/audio/links) |    ❌    |     ❌     |       ❌       |
 
 ## Known issues
 
