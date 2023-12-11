@@ -200,6 +200,15 @@ class Signal {
       'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
     );
 
+    // Prepare a statement to run it multiple times:
+    final reactionImport = _database!.prepare(
+      'INSERT INTO reaction '
+      '('
+      'message_id, author_id, emoji, date_sent, date_received'
+      ') '
+      'VALUES (?, ?, ?, ?, ?)',
+    );
+
     // Import all messages
     var counter = 0;
     var step = (_signalMessages.length / 10).ceil();
@@ -249,6 +258,25 @@ class Signal {
 
         // All good
         signalMessageImportSuccess = true;
+      }
+
+      // Get last insert id as signalMessageId
+      int signalMessageId =
+          _database!.select('select last_insert_rowid()').first.columnAt(0);
+
+      // Import reactions
+      for (var reaction in signalMessage.reactions) {
+        if (reaction.sendTimestamp == null) {
+          continue;
+        }
+
+        reactionImport.execute([
+          signalMessageId,
+          reaction.authorId,
+          reaction.reaction,
+          reaction.sendTimestamp,
+          reaction.receivedTimestamp ?? reaction.sendTimestamp! + 500,
+        ]);
       }
 
       if (!verbose) continue;

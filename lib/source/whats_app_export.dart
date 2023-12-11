@@ -3,15 +3,15 @@ import 'package:path/path.dart' as path;
 import 'package:move_to_signal/import/signal.dart';
 import 'package:move_to_signal/model/signal_message.dart';
 
-class WhatsApp extends Signal {
-  Directory? whatsappExports;
+class WhatsAppExport extends Signal {
+  Directory? _whatsAppExports;
 
   @override
   run(List<String> arguments) {
     // Read all arguments
     for (final argument in arguments) {
-      if (argument.startsWith('--whatsappExports=')) {
-        whatsappExports = Directory(argument.split('=').last);
+      if (argument.startsWith('--whatsAppExports=')) {
+        _whatsAppExports = Directory(argument.split('=').last);
       }
     }
 
@@ -21,15 +21,15 @@ class WhatsApp extends Signal {
 
     if (verbose) print('Check missing WhatsApp arguments');
 
-    if (whatsappExports == null) {
-      print('Missing argument --whatsappExports');
+    if (_whatsAppExports == null) {
+      print('Missing argument --whatsAppExports');
       return;
     }
 
     if (verbose) print('Check WhatsApp Exports folder');
 
-    if (!whatsappExports!.existsSync()) {
-      print('--whatsappExports=${whatsappExports!.path} folder not found');
+    if (!_whatsAppExports!.existsSync()) {
+      print('--whatsappExports=${_whatsAppExports!.path} folder not found');
       return;
     }
 
@@ -37,7 +37,7 @@ class WhatsApp extends Signal {
 
     signalBackupDecrypt();
 
-    whatsappExports!.listSync().forEach((whatsappExport) {
+    _whatsAppExports!.listSync().forEach((whatsappExport) {
       if (whatsappExport is File && whatsappExport.path.endsWith('.txt')) {
         _parseWhatsappExport(whatsappExport);
       }

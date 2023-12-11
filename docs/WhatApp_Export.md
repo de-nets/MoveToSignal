@@ -39,7 +39,7 @@ Always start by creating a [Signal](docs/Signal.md) backup.
    --signalBackup=./signal-YYYY-MM-DD-HH-mm-ss.backup \
    --signalBackupKey=123451234512345123451234512345 \
    --signalPhoneNumber=+49123456789 \
-   --whatsappExports=./whatsapp \
+   --whatsAppExports=./whatsapp \
    --verbose
    ```
 
@@ -53,7 +53,7 @@ Always start by creating a [Signal](docs/Signal.md) backup.
    --signalBackup=./signal-YYYY-MM-DD-HH-mm-ss.backup \
    --signalBackupKey=123451234512345123451234512345 \
    --signalPhoneNumber=+49123456789 \
-   --whatsappExports=./whatsapp \
+   --whatsAppExports=./whatsapp \
    --verbose
    ```
 

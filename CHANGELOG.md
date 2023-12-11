@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+- Added WhatsApp import from DB
+- Added import reactions to signal
+- Updates docs
+
 ## 1.1.0
 
 - Added Telegram messages import

@@ -5,14 +5,12 @@ class SignalThread {
   int snippetType = 10485780;
   int lastSeen = 0;
 
-  Map<String, dynamic> toJson() => {
+  @override
+  String toString() => {
         "_id": threadId,
         "date": date,
         "snippet": snippet,
         "snippetType": snippetType,
         "lastSeen": lastSeen,
-      };
-
-  @override
-  String toString() => '$threadId|$date|$snippet|$snippetType|$lastSeen';
+      }.toString();
 }
