@@ -1,4 +1,5 @@
 import 'package:move_to_signal/import/signal.dart';
+import 'package:move_to_signal/source/sms.dart';
 import 'package:move_to_signal/source/telegram.dart';
 import 'package:move_to_signal/source/whats_app_db.dart';
 import 'package:move_to_signal/source/whats_app_export.dart';
@@ -18,6 +19,12 @@ void main(List<String> arguments) {
   }
 
   switch (command) {
+    case 'ImportSms':
+      final smsImport = Sms();
+      smsImport.verbose = verbose;
+      smsImport.run(arguments);
+
+      break;
     case 'ImportTelegram':
       final telegramImport = Telegram();
       telegramImport.verbose = verbose;
