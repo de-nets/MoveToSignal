@@ -52,7 +52,7 @@ Always start by creating a [Signal](docs/Signal.md) backup.
 
    eg: +49123456789-Max ExampleName.txt
 
-   Only the phone number important for SMS imports.
+   Only the phone number is important for SMS imports.
    The phone number needs to in international format starting with + and must only contain numbers.
 
 4. Run MoveToSignal in terminal to import the prepared messages
