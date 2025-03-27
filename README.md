@@ -19,6 +19,7 @@ See: [Signal](docs/Signal.md)
 
 Import messages from:
 
+- [SMS](docs/Sms.md)
 - [Telegram](docs/Telegram.md)
 - [WhatApp DB](docs/WhatApp_DB.md)
 - [WhatApp export](docs/WhatApp_Export.md)
@@ -39,13 +40,15 @@ bin/move_to_signal.dart \
 
 ## Feature Map
 
-| Name                       | Telegram | WhatApp DB | WhatApp export |
-| :------------------------- | :------: | :--------: | :------------: |
-| All 1-on-1 text messages   |    ✅    |     ✅     |       ❌       |
-| Group chats                |    ❌    |     ❌     |       ❌       |
-| Original timestamps        |    ✅    |     ✅     |       ❌       |
-| Reactions (emoji)          |    ❌    |     ✅     |       ❌       |
-| Media (images/audio/links) |    ❌    |     ❌     |       ❌       |
+| Name                       | SMS | Telegram | WhatApp DB | WhatApp export |
+| :------------------------- | :-: | :------: | :--------: | :------------: |
+| All 1-on-1 text messages   | ✅  |    ✅    |     ✅     |       ❌       |
+| Group chats                | ❌  |    ❌    |     ❌     |       ❌       |
+| Original timestamps        | ✅  |    ✅    |     ✅     |       ❌       |
+| Reactions (emoji)          | ❌  |    ❌    |     ✅     |       ❌       |
+| MMS Text                   | ❌  |    -     |     -      |       -        |
+| MMS (images/audio/links)   | ❌  |    -     |     -      |       -        |
+| Media (images/audio/links) | ❌  |    ❌    |     ❌     |       ❌       |
 
 ## Known issues
 

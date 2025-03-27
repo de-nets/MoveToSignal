@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+
+- Added SMS import from SMS xml export
+
 ## 1.2.1
 
 - Fixed some messages are not shown after WhatsApp import from DB
