@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:move_to_signal/model/signal_message.dart';
 import 'package:move_to_signal/model/sms_message.dart';
 import 'package:move_to_signal/model/sms_thread.dart';
 import 'package:path/path.dart' as path;
@@ -84,6 +86,86 @@ class Sms extends Signal {
       print('');
       print('Once you are done, you can start the import process.');
       print('');
+    }
+
+    if (_smsMode == 'Import') {
+      if (verbose) print('Run in SMS import mode');
+
+      if (!_smsExportsFolder.existsSync()) {
+        print(
+            'Folder $_smsExportsFolder not found. Did you run prepare mode first?');
+        return;
+      }
+
+      super.run(arguments);
+
+      _smsExportsFolder.listSync().forEach((smsExport) {
+        if (smsExport is File && smsExport.path.endsWith('.txt')) {
+          _parseSmsExport(smsExport);
+        }
+      });
+
+      signalImport();
+    }
+  }
+
+  void _parseSmsExport(File smsExport) {
+    if (verbose) {
+      print('Parse SMS export: ${path.basename(smsExport.path)}');
+    }
+
+    var filename = path.basenameWithoutExtension(smsExport.path);
+    var filenameParts = filename.split('-');
+
+    if (filenameParts.length != 2) {
+      print('File name format error ${smsExport.path}');
+      return;
+    }
+
+    // Get contact date from filename
+    final contactNumber = filenameParts[0];
+    final contactSignalId = signalGetRecipientID(contactNumber);
+    if (contactSignalId == 0) {
+      print(
+          'No RecipientID was found for contact "$contactNumber" in Signal backup');
+      return;
+    }
+
+    final contactSignalThreadId = signalGetThreadID(contactSignalId);
+    if (contactSignalThreadId == 0) {
+      print(
+          'No ThreadId was found for contact "$contactNumber" in Signal backup');
+      return;
+    }
+
+    // Init new SignalMessage
+    var signalMessage = SignalMessage();
+
+    // Read SMS export file
+    final messages = jsonDecode(smsExport.readAsStringSync());
+
+    for (final message in messages) {
+      signalMessage.messageDateTime = message['date'] * 1000;
+      signalMessage.body = message['text'];
+
+      if (message['received']) {
+        // Message was received
+
+        signalMessage.threadId = contactSignalThreadId;
+        signalMessage.fromRecipientId = contactSignalId;
+        signalMessage.toRecipientId = signalUserID;
+        signalMessage.setReceived();
+      } else {
+        // Message was sent
+
+        signalMessage.threadId = contactSignalThreadId;
+        signalMessage.fromRecipientId = signalUserID;
+        signalMessage.toRecipientId = contactSignalId;
+        signalMessage.setSend();
+      }
+
+      signalAddMessage(signalMessage);
+      signalMessage = SignalMessage();
     }
   }
 
