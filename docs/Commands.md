@@ -5,6 +5,7 @@
     Show detailed progress
 
 --command=
+    [ImportSms] For SMS exports
     [ImportTelegram] For Telegram exports
     [ImportWhatsAppDb] For WhatsApp db import (needs decrypted db with wa-crypt-tools)
     [ImportWhatsAppExports] For WhatsApp exports (default)
@@ -25,6 +26,16 @@
 
 --signalPhoneNumber=
     Your Signal account phone number
+
+--smsXml=
+    Path to the SMS export xml file
+
+--smsExports=
+    Path where to create the folder SmsExportsFolder to write the SMS export files into.
+
+--smsMode=
+    [Prepare] Prepare the import by extracting all conversations from sms xml into separate files to review. (default)
+    [Import] Imports the files from step [Prepare] into the Signal database.
 
 --telegramExports=
     Path where to create the folder TelegramExportsFolder to write the Telegram export files into.
