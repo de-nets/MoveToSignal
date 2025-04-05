@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:move_to_signal/model/signal_reaction.dart';
 import 'package:move_to_signal/model/whats_app_message.dart';
+import 'package:move_to_signal/model/whats_app_participant.dart';
 import 'package:move_to_signal/model/whats_app_reaction.dart';
 import 'package:move_to_signal/model/whats_app_thread.dart';
 import 'package:path/path.dart' as path;
@@ -221,6 +222,120 @@ class WhatsAppDb extends Signal {
     }
 
     _database.dispose();
+  }
+
+  WhatsAppThread _getWhatsAppMessages(WhatsAppThread whatsAppThread) {
+    List<WhatsAppMessage> whatsAppMessages = [];
+
+    // Get all messages for this thread
+    ResultSet messages = _database.select(
+      'SELECT '
+      'message._id, '
+      'message.message_type, '
+      'message.text_data, '
+      'message.from_me, '
+      'message.status, '
+      'message.timestamp, '
+      'message.received_timestamp, '
+      'message.receipt_server_timestamp, '
+      'jid._id AS contactId, '
+      'jid.user AS phoneNumber '
+      'FROM message '
+      'LEFT JOIN jid ON jid._id = message.sender_jid_row_id '
+      'WHERE message.chat_row_id=${whatsAppThread.id};',
+    );
+
+    for (final message in messages) {
+      final String? text = message['text_data'];
+      if (text == null || text.isEmpty) {
+        // Ignore empty messages
+        continue;
+      }
+
+      final WhatsAppMessage whatsAppMessage = WhatsAppMessage();
+
+      if (whatsAppThread.isGroup && message['contactId'] != null) {
+        if (whatsAppThread.participants.indexWhere((participant) =>
+                participant.id == message['contactId'].toString()) ==
+            -1) {
+          final participant = WhatsAppParticipant();
+          participant.id = message['contactId'];
+          participant.rank = -1;
+          participant.phoneNumber =
+              _parseWhatsAppUser(message['phoneNumber'].toString());
+          whatsAppThread.participants.add(participant);
+        }
+        whatsAppMessage.contactId = message['contactId'];
+      }
+
+      if (message['from_me'] == 1) {
+        whatsAppMessage.fromMe = true;
+      }
+
+      if (whatsAppMessage.fromMe && message['status'] == 13) {
+        whatsAppMessage.read = 1;
+      }
+
+      whatsAppMessage.text = message['text_data'];
+      whatsAppMessage.type = message['message_type'];
+      whatsAppMessage.timestamp = message['timestamp'];
+      whatsAppMessage.receivedTimestamp = message['received_timestamp'];
+      whatsAppMessage.receiptServerTimestamp =
+          message['receipt_server_timestamp'];
+
+      whatsAppMessage.reactions =
+          _getWhatsAppReactions(message['_id'].toString());
+
+      whatsAppMessages.add(whatsAppMessage);
+    }
+
+    whatsAppThread.messages = whatsAppMessages;
+
+    return whatsAppThread;
+  }
+
+  String _parseWhatsAppUser(String user) {
+    if (user.isNotEmpty && !user.startsWith('+', 0)) {
+      user = '+$user';
+    }
+    return user;
+  }
+
+  List<WhatsAppReaction> _getWhatsAppReactions(String messageId) {
+    List<WhatsAppReaction> whatsAppReactions = [];
+    // Get all reactions for this message
+    ResultSet reactions = _database.select(
+      'SELECT '
+      'message_add_on_reaction.reaction, '
+      'message_add_on_reaction.sender_timestamp, '
+      'message_add_on.received_timestamp, '
+      'message_add_on.from_me, '
+      'message_add_on.sender_jid_row_id AS contactId '
+      'FROM message_add_on '
+      'LEFT JOIN message_add_on_reaction ON message_add_on_reaction.message_add_on_row_id = message_add_on._id '
+      'WHERE message_add_on.parent_message_row_id=${messageId};',
+    );
+
+    for (final reaction in reactions) {
+      if (reaction['reaction'] == null) {
+        continue;
+      }
+
+      final WhatsAppReaction whatsAppReaction = WhatsAppReaction();
+
+      whatsAppReaction.reaction = reaction['reaction'];
+      whatsAppReaction.contactId = reaction['contactId'];
+
+      if (reaction['from_me'] == 1) {
+        whatsAppReaction.fromMe = true;
+      } else if (reaction['from_me'] == 0) {}
+      whatsAppReaction.sendTimestamp = reaction['sender_timestamp'];
+      whatsAppReaction.receivedTimestamp = reaction['received_timestamp'];
+
+      whatsAppReactions.add(whatsAppReaction);
+    }
+
+    return whatsAppReactions;
   }
 
   void _parseWhatsAppExport(File whatsAppExport) {
