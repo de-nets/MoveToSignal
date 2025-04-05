@@ -320,7 +320,8 @@ class WhatsAppDb extends Signal {
 
       if (reaction['from_me'] == 1) {
         whatsAppReaction.fromMe = true;
-      } else if (reaction['from_me'] == 0) {}
+      }
+
       whatsAppReaction.sendTimestamp = reaction['sender_timestamp'];
       whatsAppReaction.receivedTimestamp = reaction['received_timestamp'];
 
