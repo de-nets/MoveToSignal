@@ -249,8 +249,8 @@ class WhatsAppDb extends Signal {
       final WhatsAppMessage whatsAppMessage = WhatsAppMessage();
 
       if (whatsAppThread.isGroup && message['contactId'] != null) {
-        if (whatsAppThread.participants.indexWhere((participant) =>
-                participant.id == message['contactId'].toString()) ==
+        if (whatsAppThread.participants.indexWhere(
+                (participant) => participant.id == message['contactId']) ==
             -1) {
           final participant = WhatsAppParticipant();
           participant.id = message['contactId'];
