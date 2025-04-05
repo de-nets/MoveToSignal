@@ -109,7 +109,7 @@ class WhatsAppDb extends Signal {
       super.run(arguments);
 
       _whatsAppExportsFolder.listSync().forEach((whatsAppExport) {
-        if (whatsAppExport is File && whatsAppExport.path.endsWith('.txt')) {
+        if (whatsAppExport is File && whatsAppExport.path.endsWith('.json')) {
           _parseWhatsAppExport(whatsAppExport);
         }
       });
@@ -277,93 +277,87 @@ class WhatsAppDb extends Signal {
       print('Parse WhatsApp export: ${path.basename(whatsAppExport.path)}');
     }
 
-    var filename = path.basenameWithoutExtension(whatsAppExport.path);
-    var filenameParts = filename.split('-');
-
-    if (filenameParts.length != 2) {
-      print('File name format error ${whatsAppExport.path}');
-      return;
-    }
-
-    // Get contact date from filename
-    final contactNumber = filenameParts[0];
-    final contactSignalId = signalGetRecipientID(contactNumber);
-    if (contactSignalId == 0) {
-      print(
-          'No RecipientID was found for contact "$contactNumber" in Signal backup');
-      return;
-    }
-
-    final contactSignalThreadId = signalGetThreadID(contactSignalId);
-    if (contactSignalThreadId == 0) {
-      print(
-          'No ThreadId was found for contact "$contactNumber" in Signal backup');
-      return;
-    }
-
-    // Init new SignalMessage
-    var signalMessage = SignalMessage();
-
     // Read WhatsApp export file
-    final messages = jsonDecode(whatsAppExport.readAsStringSync());
+    final thread = WhatsAppThread()
+        .fromDynamic(jsonDecode(whatsAppExport.readAsStringSync()));
 
-    for (final message in messages) {
-      signalMessage.messageDateTime = message['timestamp'];
-      signalMessage.body = message['text'];
-
-      if (message['fromMe']) {
-        // Message was sent
-
-        signalMessage.threadId = contactSignalThreadId;
-        signalMessage.fromRecipientId = signalUserID;
-        signalMessage.toRecipientId = contactSignalId;
-        signalMessage.setSend();
-        if (message['receivedTimestamp'] != 0) {
-          signalMessage.dateReceived = message['receivedTimestamp'];
-        }
-        if (message['receiptServerTimestamp'] != 0) {
-          signalMessage.receiptTimestamp = message['receiptServerTimestamp'];
-        }
-      } else {
-        // Message was received
-
-        signalMessage.threadId = contactSignalThreadId;
-        signalMessage.fromRecipientId = contactSignalId;
-        signalMessage.toRecipientId = signalUserID;
-        signalMessage.setReceived();
-        if (message['receivedTimestamp'] != 0) {
-          signalMessage.dateReceived = message['receivedTimestamp'];
-        }
-        if (message['receiptServerTimestamp'] != 0) {
-          signalMessage.receiptTimestamp = message['receiptServerTimestamp'];
-        }
+    if (thread.isGroup) {
+    } else {
+      // Get contact date from filename
+      final contactNumber = thread.phoneNumber;
+      final contactSignalId = signalGetRecipientID(contactNumber);
+      if (contactSignalId == 0) {
+        print(
+            'No RecipientID was found for contact "$contactNumber" in Signal backup');
+        return;
       }
 
-      for (final reaction in message['reactions']) {
-        final signalReaction = SignalReaction();
+      final contactSignalThreadId = signalGetThreadID(contactSignalId);
+      if (contactSignalThreadId == 0) {
+        print(
+            'No ThreadId was found for contact "$contactNumber" in Signal backup');
+        return;
+      }
+      // Init new SignalMessage
+      SignalMessage signalMessage;
 
-        if (reaction['fromMe'] == null ||
-            reaction['reaction'] == null ||
-            reaction['reaction'].isEmpty) {
-          continue;
-        }
+      for (final message in thread.messages) {
+        signalMessage = SignalMessage();
 
-        signalReaction.fromMe = reaction['fromMe'];
+        signalMessage.messageDateTime = message.timestamp;
+        signalMessage.body = message.text;
 
-        if (signalReaction.fromMe!) {
-          signalReaction.authorId = signalUserID;
+        if (message.fromMe) {
+          // Message was sent
+
+          signalMessage.threadId = contactSignalThreadId;
+          signalMessage.fromRecipientId = signalUserID;
+          signalMessage.toRecipientId = contactSignalId;
+          signalMessage.setSend();
+          if (message.receivedTimestamp != 0) {
+            signalMessage.dateReceived = message.receivedTimestamp;
+          }
+          if (message.receiptServerTimestamp != 0) {
+            signalMessage.receiptTimestamp = message.receiptServerTimestamp;
+          }
         } else {
-          signalReaction.authorId = contactSignalId;
+          // Message was received
+
+          signalMessage.threadId = contactSignalThreadId;
+          signalMessage.fromRecipientId = contactSignalId;
+          signalMessage.toRecipientId = signalUserID;
+          signalMessage.setReceived();
+          if (message.receivedTimestamp != 0) {
+            signalMessage.dateReceived = message.receivedTimestamp;
+          }
+          if (message.receiptServerTimestamp != 0) {
+            signalMessage.receiptTimestamp = message.receiptServerTimestamp;
+          }
         }
-        signalReaction.reaction = reaction['reaction'];
-        signalReaction.sendTimestamp = reaction['sendTimestamp'];
-        signalReaction.receivedTimestamp = reaction['receivedTimestamp'];
 
-        signalMessage.reactions.add(signalReaction);
+        for (final reaction in message.reactions) {
+          final signalReaction = SignalReaction();
+
+          if (reaction.reaction == null || reaction.reaction!.isEmpty) {
+            continue;
+          }
+
+          signalReaction.fromMe = reaction.fromMe;
+
+          if (signalReaction.fromMe!) {
+            signalReaction.authorId = signalUserID;
+          } else {
+            signalReaction.authorId = contactSignalId;
+          }
+          signalReaction.reaction = reaction.reaction;
+          signalReaction.sendTimestamp = reaction.sendTimestamp;
+          signalReaction.receivedTimestamp = reaction.receivedTimestamp;
+
+          signalMessage.reactions.add(signalReaction);
+        }
+
+        signalAddMessage(signalMessage);
       }
-
-      signalAddMessage(signalMessage);
-      signalMessage = SignalMessage();
     }
   }
 
@@ -384,24 +378,15 @@ class WhatsAppDb extends Signal {
         fileName = whatsAppThread.fromId;
       }
 
-      fileName = '$fileName-${whatsAppThread.name}.txt';
+      fileName =
+          '${whatsAppThread.isGroup ? 'GroupChat' : 'DirectChat'}-$fileName-${whatsAppThread.name}.json';
 
       final filePath = path.join(_whatsAppExportsFolder.path, fileName);
       final export = File(filePath).openSync(mode: FileMode.writeOnlyAppend);
 
       if (verbose) print('Export: $fileName');
 
-      export.writeStringSync("[\n");
-      var firstLine = true;
-      for (final message in whatsAppThread.messages) {
-        if (!firstLine) {
-          export.writeStringSync(",\n");
-        } else {
-          firstLine = false;
-        }
-        export.writeStringSync(message.toString());
-      }
-      export.writeStringSync("\n]");
+      export.writeStringSync(whatsAppThread.toString());
 
       export.closeSync();
     }
