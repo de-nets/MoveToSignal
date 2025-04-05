@@ -142,7 +142,7 @@ class WhatsAppDb extends Signal {
       }
 
       final WhatsAppThread whatsAppThread = WhatsAppThread();
-      whatsAppThread.id = thread['_id'].toString();
+      whatsAppThread.id = thread['_id'];
       whatsAppThread.phoneNumber = '+${jidSplit[0]}';
       whatsAppThread.fromId = jid;
 
