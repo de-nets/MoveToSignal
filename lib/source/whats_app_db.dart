@@ -126,95 +126,29 @@ class WhatsAppDb extends Signal {
       mode: OpenMode.readOnly,
     );
 
+    WhatsAppThread whatsAppThread;
+
     // Get all 1 on 1 threads
-    ResultSet threads = _database.select(
-        'SELECT _id, raw_string_jid FROM chat_view WHERE raw_string_jid like "%@s.whatsapp.net";');
+    ResultSet directChats = _database.select(
+        'SELECT chat._id, jid.raw_string, jid._id AS contactId, jid.user AS phoneNumber '
+        'FROM chat '
+        'LEFT JOIN jid ON chat.jid_row_id = jid._id '
+        'WHERE jid.raw_string like "%@s.whatsapp.net";');
 
-    if (verbose) print('Get all messages and reactions');
-    for (final thread in threads) {
-      // Get phone number
-      final jid = thread['raw_string_jid'];
-      final jidSplit = jid.split('@');
-      if (jidSplit.length != 2) {
-        // Something went wrong
-        if (verbose) print('Something went wrong: $thread');
+    if (verbose) print('Get all 1 on 1 messages and reactions');
 
-        continue;
-      }
+    for (final directChat in directChats) {
+      whatsAppThread = WhatsAppThread();
 
-      final WhatsAppThread whatsAppThread = WhatsAppThread();
-      whatsAppThread.id = thread['_id'];
-      whatsAppThread.phoneNumber = '+${jidSplit[0]}';
-      whatsAppThread.fromId = jid;
+      whatsAppThread.id = directChat['_id'];
+      whatsAppThread.phoneNumber =
+          _parseWhatsAppUser(directChat['phoneNumber'].toString());
+      whatsAppThread.fromId = directChat['raw_string'];
 
       whatsAppThread.name =
           signalGetRecipientName(whatsAppThread.phoneNumber) ?? '';
 
-      // Get all messages for this thread
-      ResultSet messages = _database.select(
-        'SELECT '
-        'message._id, '
-        'message.text_data, '
-        'message.from_me, '
-        'message.status, '
-        'message.timestamp, '
-        'message.received_timestamp, '
-        'message.receipt_server_timestamp '
-        'FROM message '
-        'WHERE message.chat_row_id=${whatsAppThread.id};',
-      );
-
-      for (final message in messages) {
-        final String? text = message['text_data'];
-        if (text == null || text.isEmpty) {
-          // Ignore empty messages
-          continue;
-        }
-
-        final WhatsAppMessage whatsAppMessage = WhatsAppMessage();
-        if (message['from_me'] != 1) {
-          whatsAppMessage.fromMe = false;
-        }
-
-        if (whatsAppMessage.fromMe && message['status'] == 13) {
-          whatsAppMessage.read = 1;
-        }
-
-        whatsAppMessage.text = message['text_data'];
-        whatsAppMessage.timestamp = message['timestamp'];
-        whatsAppMessage.receivedTimestamp = message['received_timestamp'];
-        whatsAppMessage.receiptServerTimestamp =
-            message['receipt_server_timestamp'];
-
-        // Get all reactions for this message
-        ResultSet reactions = _database.select(
-          'SELECT '
-          'message_add_on_reaction.reaction, '
-          'message_add_on_reaction.sender_timestamp, '
-          'message_add_on.received_timestamp, '
-          'message_add_on.from_me '
-          'FROM message_add_on '
-          'LEFT JOIN message_add_on_reaction ON message_add_on_reaction.message_add_on_row_id = message_add_on._id '
-          'WHERE message_add_on.parent_message_row_id=${message['_id']};',
-        );
-
-        for (final reaction in reactions) {
-          final WhatsAppReaction whatsAppReaction = WhatsAppReaction();
-
-          whatsAppReaction.reaction = reaction['reaction'];
-          if (reaction['from_me'] == 1) {
-            whatsAppReaction.fromMe = true;
-          } else if (reaction['from_me'] == 0) {
-            whatsAppReaction.fromMe = false;
-          }
-          whatsAppReaction.sendTimestamp = reaction['sender_timestamp'];
-          whatsAppReaction.receivedTimestamp = reaction['received_timestamp'];
-
-          whatsAppMessage.reactions.add(whatsAppReaction);
-        }
-
-        whatsAppThread.messages.add(whatsAppMessage);
-      }
+      whatsAppThread = _getWhatsAppMessages(whatsAppThread);
 
       if (whatsAppThread.messages.isNotEmpty) {
         _whatsAppThreads.add(whatsAppThread);
