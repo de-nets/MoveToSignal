@@ -155,6 +155,66 @@ class WhatsAppDb extends Signal {
       }
     }
 
+    // Get all group threads
+    ResultSet groupChats = _database.select(
+        'SELECT chat._id, jid.raw_string, chat.subject, chat.created_timestamp, jid._id AS groupId '
+        'FROM chat '
+        'LEFT JOIN jid ON chat.jid_row_id = jid._id '
+        'WHERE jid.raw_string like "%@g.us";');
+
+    if (verbose) print('Get all group messages and reactions');
+    for (final groupChat in groupChats) {
+      whatsAppThread = WhatsAppThread();
+
+      whatsAppThread.id = groupChat['_id'];
+      whatsAppThread.fromId = groupChat['raw_string'];
+      whatsAppThread.isGroup = true;
+      whatsAppThread.name = groupChat['subject'].toString();
+      whatsAppThread.createdTimestamp = groupChat['created_timestamp'];
+
+      // Get groups
+      ResultSet groupParticipants = _database.select(
+          'SELECT group_participant_user.user_jid_row_id, group_participant_user.rank, jid.user, jid.raw_string '
+          'FROM group_participant_user '
+          'LEFT JOIN jid ON jid._id = group_participant_user.user_jid_row_id '
+          'WHERE group_participant_user.group_jid_row_id = ${groupChat['groupId']};');
+
+      for (final groupParticipant in groupParticipants) {
+        final WhatsAppParticipant whatsAppParticipant = WhatsAppParticipant();
+        whatsAppParticipant.id = groupParticipant['user_jid_row_id'];
+        if (groupParticipant['raw_string'].toString() == 'status_me') {
+          whatsAppParticipant.phoneNumber = signalPhoneNumber;
+        } else {
+          whatsAppParticipant.phoneNumber =
+              _parseWhatsAppUser(groupParticipant['user'].toString());
+        }
+
+        whatsAppParticipant.rank = groupParticipant['rank'];
+        whatsAppThread.participants.add(whatsAppParticipant);
+        if (groupParticipant['rank'].toString() == '2') {
+          whatsAppThread.phoneNumber =
+              _parseWhatsAppUser(groupParticipant['user'].toString());
+          whatsAppThread.fromId = groupParticipant['raw_string'].toString();
+        }
+      }
+      if (whatsAppThread.phoneNumber.isEmpty) {
+        final fromIdSplit = whatsAppThread.fromId.split('@');
+        if (fromIdSplit.length == 2) {
+          final phoneNumberSplit = fromIdSplit[0].split('-');
+          if (phoneNumberSplit.length == 2) {
+            whatsAppThread.phoneNumber =
+                _parseWhatsAppUser(phoneNumberSplit[0]);
+          }
+        }
+      }
+
+      whatsAppThread = _getWhatsAppMessages(whatsAppThread);
+
+      if (whatsAppThread.messages.isNotEmpty) {
+        _whatsAppThreads.add(whatsAppThread);
+      }
+    }
+
     _database.dispose();
   }
 
