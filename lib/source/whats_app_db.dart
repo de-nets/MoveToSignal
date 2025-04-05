@@ -182,18 +182,16 @@ class WhatsAppDb extends Signal {
       for (final groupParticipant in groupParticipants) {
         final WhatsAppParticipant whatsAppParticipant = WhatsAppParticipant();
         whatsAppParticipant.id = groupParticipant['user_jid_row_id'];
+        var phoneNumber = groupParticipant['user'].toString();
         if (groupParticipant['raw_string'].toString() == 'status_me') {
-          whatsAppParticipant.phoneNumber = signalPhoneNumber;
-        } else {
-          whatsAppParticipant.phoneNumber =
-              _parseWhatsAppUser(groupParticipant['user'].toString());
+          phoneNumber = signalPhoneNumber;
         }
+        whatsAppParticipant.phoneNumber = _parseWhatsAppUser(phoneNumber);
 
         whatsAppParticipant.rank = groupParticipant['rank'];
         whatsAppThread.participants.add(whatsAppParticipant);
         if (groupParticipant['rank'].toString() == '2') {
-          whatsAppThread.phoneNumber =
-              _parseWhatsAppUser(groupParticipant['user'].toString());
+          whatsAppThread.phoneNumber = _parseWhatsAppUser(phoneNumber);
           whatsAppThread.fromId = groupParticipant['raw_string'].toString();
         }
       }
